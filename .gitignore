@@ -1,0 +1,30 @@
+# JetBrains Rider & ReSharper
+*.sln.DotSettings.user
+.idea
+
+# .NET Core build artifacts
+*bin
+*obj
+
+# User-specific files
+*.user
+*.suo
+
+# Log files
+*.log
+*log
+*logs
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Rider temporary files
+*~
+*.orig
+*.bak
+*.swp
