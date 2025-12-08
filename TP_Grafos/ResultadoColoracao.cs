@@ -37,6 +37,10 @@ namespace TP_Grafos
         /// </summary>
         public ResultadoColoracao()
         {
+            GruposPorCor = new Dictionary<int, List<int>>();
+            CorPorVertice = new Dictionary<int, int>();
+            NumeroTurnos = 0;
+            TempoExecucao = 0;
         }
 
         /// <summary>
@@ -46,6 +50,20 @@ namespace TP_Grafos
         /// <param name="cor">A cor.</param>
         public void AtribuirCor(int vertice, int cor)
         {
+            // Mapeia vértice → cor
+            CorPorVertice[vertice] = cor;
+
+            // Cria o grupo da cor, se necessário
+            if (!GruposPorCor.ContainsKey(cor))
+            {
+                GruposPorCor[cor] = new List<int>();
+            }
+
+            // Evita duplicação
+            if (!GruposPorCor[cor].Contains(vertice))
+            {
+                GruposPorCor[cor].Add(vertice);
+            }
         }
 
         /// <summary>
@@ -55,7 +73,12 @@ namespace TP_Grafos
         /// <returns>A lista de vértices.</returns>
         public List<int> ObterVerticesPorCor(int cor)
         {
-            return null;
+            if (GruposPorCor.ContainsKey(cor))
+            {
+                return GruposPorCor[cor];
+            }
+
+            return new List<int>();
         }
 
         /// <summary>
@@ -64,7 +87,29 @@ namespace TP_Grafos
         /// <returns>A string que representa o resultado.</returns>
         public override string ToString()
         {
-            return "";
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("Resultado da Coloração");
+            sb.AppendLine("Algoritmo: " + AlgoritmoUsado);
+            sb.AppendLine("Número de cores utilizadas: " + NumeroTurnos);
+            sb.AppendLine("Tempo de execução: " + TempoExecucao + " ms");
+            sb.AppendLine();
+
+            foreach (var grupo in GruposPorCor)
+            {
+                sb.Append("Cor ").Append(grupo.Key).Append(": ");
+
+                for (int i = 0; i < grupo.Value.Count; i++)
+                {
+                    sb.Append(grupo.Value[i]);
+                    if (i < grupo.Value.Count - 1)
+                        sb.Append(", ");
+                }
+
+                sb.AppendLine();
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>
@@ -73,7 +118,33 @@ namespace TP_Grafos
         /// <returns>A string JSON.</returns>
         public string ToJson()
         {
-            return "";
+            StringBuilder json = new StringBuilder();
+
+            json.Append("{");
+            json.Append("\"algoritmo\":\"").Append(AlgoritmoUsado).Append("\",");
+            json.Append("\"numeroTurnos\":").Append(NumeroTurnos).Append(",");
+            json.Append("\"tempoExecucao\":").Append(TempoExecucao).Append(",");
+            json.Append("\"gruposPorCor\":{");
+
+            int contadorCores = 0;
+            foreach (var grupo in GruposPorCor)
+            {
+                json.Append("\"").Append(grupo.Key).Append("\":[");
+                for (int i = 0; i < grupo.Value.Count; i++)
+                {
+                    json.Append(grupo.Value[i]);
+                    if (i < grupo.Value.Count - 1)
+                        json.Append(",");
+                }
+                json.Append("]");
+
+                contadorCores++;
+                if (contadorCores < GruposPorCor.Count)
+                    json.Append(",");
+            }
+
+            json.Append("}}");
+            return json.ToString();
         }
     }
 }

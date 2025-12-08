@@ -38,6 +38,10 @@ namespace TP_Grafos
         /// <param name="grafo">O grafo.</param>
         public AlgoritmoColoracao(Grafo grafo)
         {
+            this.grafo = grafo;
+            cores = new int[grafo.NumVertices];
+            grauSaturacao = new int[grafo.NumVertices];
+            ordemVertices = new List<int>();
         }
 
         /// <summary>
@@ -46,7 +50,27 @@ namespace TP_Grafos
         /// <returns>O resultado da coloração.</returns>
         public ResultadoColoracao ColoracaoGulosa()
         {
-            return null;
+            Array.Fill(cores, -1);
+            numCores = 0;
+
+            ResultadoColoracao resultado = new ResultadoColoracao
+            {
+                AlgoritmoUsado = "Coloração Gulosa",
+                CorPorVertice = new Dictionary<int, int>(),
+                GruposPorCor = new Dictionary<int, List<int>>(),
+                TempoExecucao = 0
+            };
+
+            for (int v = 0; v < grafo.NumVertices; v++)
+            {
+                int cor = ObterPrimeiraCor(v);
+                cores[v] = cor;
+                resultado.AtribuirCor(v, cor);
+                numCores = Math.Max(numCores, cor + 1);
+            }
+
+            resultado.NumeroTurnos = numCores;
+            return resultado;
         }
 
         /// <summary>
@@ -55,7 +79,35 @@ namespace TP_Grafos
         /// <returns>O resultado da coloração.</returns>
         public ResultadoColoracao ColoracaoDSATUR()
         {
-            return null;
+            Array.Fill(cores, -1);
+            Array.Fill(grauSaturacao, 0);
+            numCores = 0;
+
+            ResultadoColoracao resultado = new ResultadoColoracao
+            {
+                AlgoritmoUsado = "DSATUR",
+                CorPorVertice = new Dictionary<int, int>(),
+                GruposPorCor = new Dictionary<int, List<int>>(),
+                TempoExecucao = 0
+            };
+
+            for (int i = 0; i < grafo.NumVertices; i++)
+            {
+                int v = ProximoVerticeDSATUR();
+                int cor = ObterPrimeiraCor(v);
+
+                cores[v] = cor;
+                resultado.AtribuirCor(v, cor);
+                numCores = Math.Max(numCores, cor + 1);
+
+                foreach (int adj in grafo.Adjacentes(v))
+                {
+                    grauSaturacao[adj] = CalcularGrauSaturacao(adj);
+                }
+            }
+
+            resultado.NumeroTurnos = numCores;
+            return resultado;
         }
 
         /// <summary>
@@ -64,7 +116,29 @@ namespace TP_Grafos
         /// <returns>O resultado da coloração.</returns>
         public ResultadoColoracao ColoracaoWelshPowell()
         {
-            return null;
+            Array.Fill(cores, -1);
+            numCores = 0;
+
+            OrdenarPorGrauDecrescente();
+
+            ResultadoColoracao resultado = new ResultadoColoracao
+            {
+                AlgoritmoUsado = "Welsh-Powell",
+                CorPorVertice = new Dictionary<int, int>(),
+                GruposPorCor = new Dictionary<int, List<int>>(),
+                TempoExecucao = 0
+            };
+
+            foreach (int v in ordemVertices)
+            {
+                int cor = ObterPrimeiraCor(v);
+                cores[v] = cor;
+                resultado.AtribuirCor(v, cor);
+                numCores = Math.Max(numCores, cor + 1);
+            }
+
+            resultado.NumeroTurnos = numCores;
+            return resultado;
         }
 
         /// <summary>
@@ -73,7 +147,28 @@ namespace TP_Grafos
         /// <returns>O índice do próximo vértice.</returns>
         private int ProximoVerticeDSATUR()
         {
-            return 0;
+            int escolhido = -1;
+            int maiorSaturacao = -1;
+            int maiorGrau = -1;
+
+            for (int v = 0; v < grafo.NumVertices; v++)
+            {
+                if (cores[v] != -1)
+                    continue;
+
+                int saturacao = grauSaturacao[v];
+                int grau = grafo.Grau(v);
+
+                if (saturacao > maiorSaturacao ||
+                    (saturacao == maiorSaturacao && grau > maiorGrau))
+                {
+                    maiorSaturacao = saturacao;
+                    maiorGrau = grau;
+                    escolhido = v;
+                }
+            }
+
+            return escolhido;
         }
 
         /// <summary>
@@ -83,7 +178,15 @@ namespace TP_Grafos
         /// <returns>O grau de saturação.</returns>
         private int CalcularGrauSaturacao(int vertice)
         {
-            return 0;
+            HashSet<int> coresAdj = new HashSet<int>();
+
+            foreach (int adj in grafo.Adjacentes(vertice))
+            {
+                if (cores[adj] != -1)
+                    coresAdj.Add(cores[adj]);
+            }
+
+            return coresAdj.Count;
         }
 
         /// <summary>
@@ -94,7 +197,12 @@ namespace TP_Grafos
         /// <returns>True se a coloração for possível, false caso contrário.</returns>
         private bool PodeColorir(int vertice, int cor)
         {
-            return false;
+            foreach (int adj in grafo.Adjacentes(vertice))
+            {
+                if (cores[adj] == cor)
+                    return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -104,7 +212,12 @@ namespace TP_Grafos
         /// <returns>A primeira cor disponível.</returns>
         private int ObterPrimeiraCor(int vertice)
         {
-            return 0;
+            int cor = 0;
+            while (!PodeColorir(vertice, cor))
+            {
+                cor++;
+            }
+            return cor;
         }
 
         /// <summary>
@@ -112,6 +225,25 @@ namespace TP_Grafos
         /// </summary>
         private void OrdenarPorGrauDecrescente()
         {
+            ordemVertices.Clear();
+
+            for (int i = 0; i < grafo.NumVertices; i++)
+            {
+                ordemVertices.Add(i);
+            }
+
+            for (int i = 0; i < ordemVertices.Count - 1; i++)
+            {
+                for (int j = i + 1; j < ordemVertices.Count; j++)
+                {
+                    if (grafo.Grau(ordemVertices[j]) > grafo.Grau(ordemVertices[i]))
+                    {
+                        int aux = ordemVertices[i];
+                        ordemVertices[i] = ordemVertices[j];
+                        ordemVertices[j] = aux;
+                    }
+                }
+            }
         }
     }
 }
