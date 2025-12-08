@@ -1,99 +1,189 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TP_Grafos
 {
-    /// <summary>
-    /// Contém algoritmos para encontrar o caminho mínimo em um grafo.
-    /// </summary>
     public class AlgoritmoCaminhoMinimo
     {
-        /// <summary>
-        /// O grafo no qual o algoritmo será executado.
-        /// </summary>
         private Grafo grafo;
-
-        /// <summary>
-        /// Array para armazenar as distâncias da origem a cada vértice.
-        /// </summary>
         private double[] distancias;
-
-        /// <summary>
-        /// Array para armazenar os predecessores de cada vértice no caminho.
-        /// </summary>
         private int[] predecessores;
-
-        /// <summary>
-        /// Array para marcar os vértices já visitados.
-        /// </summary>
         private bool[] visitados;
 
-        /// <summary>
-        /// Construtor que recebe o grafo.
-        /// </summary>
-        /// <param name="grafo">O grafo.</param>
         public AlgoritmoCaminhoMinimo(Grafo grafo)
         {
+            this.grafo = grafo;
         }
 
-        /// <summary>
-        /// Executa o algoritmo de Dijkstra para encontrar o caminho mínimo.
-        /// </summary>
-        /// <param name="origem">Vértice de origem.</param>
-        /// <param name="destino">Vértice de destino.</param>
-        /// <returns>O resultado do caminho mínimo.</returns>
-        public ResultadoCaminho Dijkstra(int origem, int destino)
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// Executa o algoritmo de Bellman-Ford para encontrar o caminho mínimo.
-        /// </summary>
-        /// <param name="origem">Vértice de origem.</param>
-        /// <param name="destino">Vértice de destino.</param>
-        /// <returns>O resultado do caminho mínimo.</returns>
-        public ResultadoCaminho BellmanFord(int origem, int destino)
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// Realiza a operação de relaxamento de uma aresta.
-        /// </summary>
-        /// <param name="u">Vértice de origem da aresta.</param>
-        /// <param name="v">Vértice de destino da aresta.</param>
-        /// <param name="peso">Peso da aresta.</param>
-        private void RelaxarAresta(int u, int v, double peso)
-        {
-        }
-
-        /// <summary>
-        /// Extrai o vértice com a menor distância da fila de prioridade.
-        /// </summary>
-        /// <param name="pq">A fila de prioridade.</param>
-        /// <returns>O vértice com a menor distância.</returns>
-        private int ExtrairMinimo(SortedSet<(double, int)> pq)
-        {
-            return 0;
-        }
-
-        /// <summary>
-        /// Reconstrói o caminho a partir dos predecessores.
-        /// </summary>
-        /// <param name="origem">Vértice de origem.</param>
-        /// <param name="destino">Vértice de destino.</param>
-        /// <returns>A lista de vértices no caminho.</returns>
-        private List<int> ReconstruirCaminho(int origem, int destino)
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// Inicializa as estruturas de dados para a execução do algoritmo.
-        /// </summary>
-        /// <param name="origem">O vértice de origem.</param>
         private void InicializarEstruturas(int origem)
         {
+            int n = grafo.NumVertices;
+            distancias = new double[n + 1];
+            predecessores = new int[n + 1];
+            visitados = new bool[n + 1];
+
+            for (int i = 1; i <= n; i++)
+            {
+                distancias[i] = double.PositiveInfinity;
+                predecessores[i] = -1;
+                visitados[i] = false;
+            }
+            distancias[origem] = 0;
+        }
+
+        public ResultadoCaminho Dijkstra(int origem, int destino)
+        {
+            InicializarEstruturas(origem);
+            var medidor = new MedidorPerformance();
+            medidor.Iniciar();
+
+            // Usando SortedSet como Fila de Prioridade: (distancia, vertice)
+            // Comparador personalizado para permitir distâncias duplicadas em vértices diferentes
+            var pq = new SortedSet<(double Dist, int Vert)>(Comparer<(double Dist, int Vert)>.Create((a, b) =>
+            {
+                int res = a.Dist.CompareTo(b.Dist);
+                if (res == 0) return a.Vert.CompareTo(b.Vert);
+                return res;
+            }));
+
+            pq.Add((0, origem));
+
+            while (pq.Count > 0)
+            {
+                int u = ExtrairMinimo(pq);
+
+                if (visitados[u]) continue;
+                visitados[u] = true;
+
+                if (u == destino) break; // Encontramos o destino
+
+                foreach (var aresta in grafo.ObterVizinhos(u))
+                {
+                    int v = aresta.Destino;
+                    if (!visitados[v])
+                    {
+                        RelaxarAresta(u, v, aresta.Peso, pq);
+                    }
+                }
+            }
+
+            medidor.Parar();
+
+            var resultado = new ResultadoCaminho
+            {
+                AlgoritmoUsado = "Dijkstra",
+                TempoExecucao = medidor.ObterTempoDecorrido(),
+                CustoTotal = distancias[destino]
+            };
+
+            if (distancias[destino] < double.PositiveInfinity)
+            {
+                resultado.Caminho = ReconstruirCaminho(origem, destino);
+                resultado.CaminhoEncontrado = true;
+            }
+            else
+            {
+                resultado.CaminhoEncontrado = false;
+            }
+
+            return resultado;
+        }
+
+        public ResultadoCaminho BellmanFord(int origem, int destino)
+        {
+            InicializarEstruturas(origem);
+            var medidor = new MedidorPerformance();
+            medidor.Iniciar();
+
+            int V = grafo.NumVertices;
+            var arestas = grafo.ObterTodasArestas();
+
+            // Relaxamento V-1 vezes
+            for (int i = 1; i < V; i++)
+            {
+                foreach (var aresta in arestas)
+                {
+                    RelaxarAresta(aresta.Origem, aresta.Destino, aresta.Peso);
+                }
+            }
+
+            // Verificação de ciclo negativo (opcional, mas boa prática em Bellman-Ford)
+            foreach (var aresta in arestas)
+            {
+                if (distancias[aresta.Origem] != double.PositiveInfinity &&
+                    distancias[aresta.Origem] + aresta.Peso < distancias[aresta.Destino])
+                {
+                    // Ciclo negativo detectado
+                    // Poderíamos lançar exceção ou marcar no resultado
+                }
+            }
+
+            medidor.Parar();
+
+            var resultado = new ResultadoCaminho
+            {
+                AlgoritmoUsado = "Bellman-Ford",
+                TempoExecucao = medidor.ObterTempoDecorrido(),
+                CustoTotal = distancias[destino]
+            };
+
+            if (distancias[destino] < double.PositiveInfinity)
+            {
+                resultado.Caminho = ReconstruirCaminho(origem, destino);
+                resultado.CaminhoEncontrado = true;
+            }
+            else
+            {
+                resultado.CaminhoEncontrado = false;
+            }
+
+            return resultado;
+        }
+
+        private void RelaxarAresta(int u, int v, double peso, SortedSet<(double, int)> pq = null)
+        {
+            if (distancias[u] != double.PositiveInfinity && distancias[u] + peso < distancias[v])
+            {
+                // Se estiver usando PQ (Dijkstra), removemos o antigo par antes de atualizar
+                if (pq != null && distancias[v] != double.PositiveInfinity)
+                {
+                    pq.Remove((distancias[v], v));
+                }
+
+                distancias[v] = distancias[u] + peso;
+                predecessores[v] = u;
+
+                if (pq != null)
+                {
+                    pq.Add((distancias[v], v));
+                }
+            }
+        }
+
+        private int ExtrairMinimo(SortedSet<(double, int)> pq)
+        {
+            var item = pq.Min;
+            pq.Remove(item);
+            return item.Item2;
+        }
+
+        private List<int> ReconstruirCaminho(int origem, int destino)
+        {
+            var caminho = new List<int>();
+            int atual = destino;
+
+            while (atual != -1)
+            {
+                caminho.Add(atual);
+                if (atual == origem) break;
+                atual = predecessores[atual];
+            }
+
+            caminho.Reverse();
+            if (caminho.Count > 0 && caminho[0] == origem)
+                return caminho;
+            return new List<int>(); // Caminho inválido
         }
     }
 }
