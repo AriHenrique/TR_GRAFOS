@@ -37,6 +37,9 @@ namespace TP_Grafos
         /// </summary>
         public ResultadoFluxo()
         {
+            CorteMinimo = new List<Aresta>();
+            FluxoPorAresta = new Dictionary<(int, int), double>();
+            CaminhosAumentantes = new List<List<int>>();
         }
 
         /// <summary>
@@ -47,6 +50,7 @@ namespace TP_Grafos
         /// <param name="fluxo">Valor do fluxo.</param>
         public void AdicionarFluxoAresta(int origem, int destino, double fluxo)
         {
+            FluxoPorAresta[(origem, destino)] = fluxo;
         }
 
         /// <summary>
@@ -55,7 +59,7 @@ namespace TP_Grafos
         /// <returns>A string que representa o resultado.</returns>
         public override string ToString()
         {
-            return "";
+            return $"Fluxo máximo: {FluxoMaximo} | Corte mínimo: {string.Join(", ", CorteMinimo)} | Tempo: {TempoExecucao:F2} ms";
         }
 
         /// <summary>
@@ -64,7 +68,7 @@ namespace TP_Grafos
         /// <returns>A string JSON.</returns>
         public string ToJson()
         {
-            return "";
+            return System.Text.Json.JsonSerializer.Serialize(this);
         }
     }
 }

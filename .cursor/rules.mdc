@@ -1,0 +1,16 @@
+Regras rápidas do projeto TR_GRAFOS (C#):
+- O trabalho deve cobrir 100% do enunciado e executar todas as análises até concluir para todos os grafos fornecidos (7 arquivos DIMACS), gerando logs e saídas completas.
+- Sempre que solicitado (ou necessário para validar), execute o programa completo sobre todos os grafos DIMACS, sem interromper, até gerar todos os logs/saídas.
+- Framework: .NET 8.0. O comando `sudo apt-get install -y dotnet-sdk-8.0` foi iniciado mas cancelado; retomar para compilar/rodar.
+- Execução: `dotnet run --project TP_Grafos/TP_Grafos.csproj [caminho/grafos_dimacs]`. Se não informar caminho, usa `grafos_dimacs` na raiz. Gera logs em `logs/` e relatórios em `relatorios/`.
+- Entrada: grafos direcionados, ponderados, com capacidade (formato DIMACS: 1ª linha V E; demais origem destino peso capacidade).
+- Grafo.cs: carrega DIMACS, escolhe matriz se densidade >= 0.5, mantém lista e matrizes de peso/capacidade, graus, conectividade, utilitários.
+- Algoritmos implementados:
+  - Caminho mínimo: Dijkstra e Bellman-Ford (AlgoritmoCaminhoMinimo).
+  - Fluxo máximo: Ford-Fulkerson (DFS) e Edmonds-Karp (BFS) com corte mínimo (AlgoritmoFluxoMaximo).
+  - AGM: Kruskal, Prim, Boruvka (AlgoritmoArvoreGeradora) com Union-Find.
+  - Coloração/turnos: Guloso, DSATUR, Welsh-Powell (AlgoritmoColoracao).
+  - Ciclos: Euleriano via Hierholzer, Hamiltoniano via backtracking (AlgoritmoCiclo).
+- Infra: Aresta, UnionFind, MedidorPerformance, classes Resultado* com ToString/JSON; ArquivoLog grava em `logs/`; GeradorRelatorio escreve texto em `relatorios/`.
+- Program.cs: percorre todos os `.dimacs` da pasta informada, executa todas as análises (origem=1, destino=último vértice) e loga resultados.
+- Pendências: instalar SDK .NET e rodar testes/execução nos 7 grafos para validar saídas e gerar logs/relatórios.

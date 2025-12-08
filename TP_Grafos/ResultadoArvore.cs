@@ -37,6 +37,8 @@ namespace TP_Grafos
         /// </summary>
         public ResultadoArvore()
         {
+            Arestas = new List<Aresta>();
+            AlgoritmoUsado = string.Empty;
         }
 
         /// <summary>
@@ -45,6 +47,8 @@ namespace TP_Grafos
         /// <param name="aresta">A aresta a ser adicionada.</param>
         public void AdicionarAresta(Aresta aresta)
         {
+            Arestas.Add(aresta);
+            CustoTotal += aresta.Peso;
         }
 
         /// <summary>
@@ -53,7 +57,12 @@ namespace TP_Grafos
         /// <returns>A string que representa o resultado.</returns>
         public override string ToString()
         {
-            return "";
+            if (!ArvoreEncontrada)
+            {
+                return "Árvore não encontrada.";
+            }
+
+            return $"Algoritmo: {AlgoritmoUsado} | Custo total: {CustoTotal} | Arestas: {string.Join(", ", Arestas)} | Tempo: {TempoExecucao:F2} ms";
         }
 
         /// <summary>
@@ -62,7 +71,7 @@ namespace TP_Grafos
         /// <returns>A string JSON.</returns>
         public string ToJson()
         {
-            return "";
+            return System.Text.Json.JsonSerializer.Serialize(this);
         }
     }
 }

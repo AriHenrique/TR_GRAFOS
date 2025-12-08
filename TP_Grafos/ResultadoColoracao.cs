@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TP_Grafos
 {
@@ -37,6 +38,9 @@ namespace TP_Grafos
         /// </summary>
         public ResultadoColoracao()
         {
+            GruposPorCor = new Dictionary<int, List<int>>();
+            CorPorVertice = new Dictionary<int, int>();
+            AlgoritmoUsado = string.Empty;
         }
 
         /// <summary>
@@ -46,6 +50,13 @@ namespace TP_Grafos
         /// <param name="cor">A cor.</param>
         public void AtribuirCor(int vertice, int cor)
         {
+            CorPorVertice[vertice] = cor;
+            if (!GruposPorCor.ContainsKey(cor))
+            {
+                GruposPorCor[cor] = new List<int>();
+            }
+
+            GruposPorCor[cor].Add(vertice);
         }
 
         /// <summary>
@@ -55,7 +66,7 @@ namespace TP_Grafos
         /// <returns>A lista de vértices.</returns>
         public List<int> ObterVerticesPorCor(int cor)
         {
-            return null;
+            return GruposPorCor.TryGetValue(cor, out var lista) ? lista : new List<int>();
         }
 
         /// <summary>
@@ -64,7 +75,7 @@ namespace TP_Grafos
         /// <returns>A string que representa o resultado.</returns>
         public override string ToString()
         {
-            return "";
+            return $"Algoritmo: {AlgoritmoUsado} | Turnos (cores): {NumeroTurnos} | Cores: {string.Join(" | ", GruposPorCor.Select(kv => $"cor {kv.Key}: [{string.Join(',', kv.Value)}]"))} | Tempo: {TempoExecucao:F2} ms";
         }
 
         /// <summary>
@@ -73,7 +84,7 @@ namespace TP_Grafos
         /// <returns>A string JSON.</returns>
         public string ToJson()
         {
-            return "";
+            return System.Text.Json.JsonSerializer.Serialize(this);
         }
     }
 }

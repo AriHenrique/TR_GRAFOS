@@ -36,6 +36,10 @@ namespace TP_Grafos
         /// <param name="capacidade">Capacidade da aresta.</param>
         public Aresta(int origem, int destino, double peso, double capacidade)
         {
+            Origem = origem;
+            Destino = destino;
+            Peso = peso;
+            Capacidade = capacidade;
         }
 
         /// <summary>
@@ -43,9 +47,10 @@ namespace TP_Grafos
         /// </summary>
         /// <param name="outra">A outra aresta a ser comparada.</param>
         /// <returns>Um valor que indica a ordem relativa das arestas.</returns>
-        public int CompareTo(Aresta outra)
+        public int CompareTo(Aresta? outra)
         {
-            return 0;
+            if (outra is null) return 1;
+            return Peso.CompareTo(outra.Peso);
         }
 
         /// <summary>
@@ -53,9 +58,17 @@ namespace TP_Grafos
         /// </summary>
         /// <param name="obj">O objeto a ser comparado.</param>
         /// <returns>True se os objetos são iguais, false caso contrário.</returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            return false;
+            if (obj is not Aresta outra)
+            {
+                return false;
+            }
+
+            return Origem == outra.Origem &&
+                   Destino == outra.Destino &&
+                   Peso.Equals(outra.Peso) &&
+                   Capacidade.Equals(outra.Capacidade);
         }
 
         /// <summary>
@@ -64,7 +77,7 @@ namespace TP_Grafos
         /// <returns>O código de hash.</returns>
         public override int GetHashCode()
         {
-            return 0;
+            return HashCode.Combine(Origem, Destino, Peso, Capacidade);
         }
 
         /// <summary>
@@ -73,7 +86,7 @@ namespace TP_Grafos
         /// <returns>A string que representa a aresta.</returns>
         public override string ToString()
         {
-            return "";
+            return $"{Origem} -> {Destino} | peso={Peso} | capacidade={Capacidade}";
         }
     }
 }

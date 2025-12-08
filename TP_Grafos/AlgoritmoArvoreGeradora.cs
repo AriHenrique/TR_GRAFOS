@@ -38,6 +38,10 @@ namespace TP_Grafos
         /// <param name="grafo">O grafo.</param>
         public AlgoritmoArvoreGeradora(Grafo grafo)
         {
+            this.grafo = grafo;
+            unionFind = new UnionFind(grafo.NumVertices);
+            visitado = new bool[grafo.NumVertices + 1];
+            arestasOrdenadas = new List<Aresta>();
         }
 
         /// <summary>
@@ -46,7 +50,33 @@ namespace TP_Grafos
         /// <returns>O resultado da árvore geradora.</returns>
         public ResultadoArvore Kruskal()
         {
-            return null;
+            var medidor = new MedidorPerformance();
+            medidor.Iniciar();
+
+            OrdenarArestasPorPeso();
+            var resultado = new ResultadoArvore
+            {
+                AlgoritmoUsado = "Kruskal",
+                ArvoreEncontrada = true
+            };
+
+            foreach (var aresta in arestasOrdenadas)
+            {
+                if (!unionFind.MesmoConjunto(aresta.Origem, aresta.Destino))
+                {
+                    unionFind.Union(aresta.Origem, aresta.Destino);
+                    resultado.AdicionarAresta(aresta);
+                    if (resultado.Arestas.Count == grafo.NumVertices - 1)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            resultado.ArvoreEncontrada = resultado.Arestas.Count == grafo.NumVertices - 1;
+            medidor.Parar();
+            resultado.TempoExecucao = medidor.ObterTempoDecorrido();
+            return resultado;
         }
 
         /// <summary>
@@ -56,7 +86,59 @@ namespace TP_Grafos
         /// <returns>O resultado da árvore geradora.</returns>
         public ResultadoArvore Prim(int verticeInicial)
         {
-            return null;
+            var medidor = new MedidorPerformance();
+            medidor.Iniciar();
+
+            var resultado = new ResultadoArvore
+            {
+                AlgoritmoUsado = "Prim"
+            };
+
+            var comparador = Comparer<(double peso, int origem, int destino)>.Create((a, b) =>
+            {
+                int comp = a.peso.CompareTo(b.peso);
+                if (comp != 0) return comp;
+                comp = a.destino.CompareTo(b.destino);
+                if (comp != 0) return comp;
+                return a.origem.CompareTo(b.origem);
+            });
+
+            var fila = new SortedSet<(double, int, int)>(comparador);
+
+            visitado = new bool[grafo.NumVertices + 1];
+            visitado[verticeInicial] = true;
+
+            foreach (var a in grafo.ObterVizinhos(verticeInicial))
+            {
+                fila.Add((a.Peso, verticeInicial, a.Destino));
+            }
+
+            while (fila.Count > 0 && resultado.Arestas.Count < grafo.NumVertices - 1)
+            {
+                var (peso, origem, destino) = fila.Min;
+                fila.Remove(fila.Min);
+
+                if (visitado[destino])
+                {
+                    continue;
+                }
+
+                visitado[destino] = true;
+                resultado.AdicionarAresta(new Aresta(origem, destino, peso, grafo.ObterCapacidade(origem, destino)));
+
+                foreach (var a in grafo.ObterVizinhos(destino))
+                {
+                    if (!visitado[a.Destino])
+                    {
+                        fila.Add((a.Peso, destino, a.Destino));
+                    }
+                }
+            }
+
+            resultado.ArvoreEncontrada = resultado.Arestas.Count == grafo.NumVertices - 1;
+            medidor.Parar();
+            resultado.TempoExecucao = medidor.ObterTempoDecorrido();
+            return resultado;
         }
 
         /// <summary>
@@ -65,7 +147,60 @@ namespace TP_Grafos
         /// <returns>O resultado da árvore geradora.</returns>
         public ResultadoArvore Boruvka()
         {
-            return null;
+            var medidor = new MedidorPerformance();
+            medidor.Iniciar();
+
+            var resultado = new ResultadoArvore
+            {
+                AlgoritmoUsado = "Boruvka"
+            };
+
+            unionFind.Reset();
+
+            while (resultado.Arestas.Count < grafo.NumVertices - 1)
+            {
+                var melhor = new Aresta[grafo.NumVertices + 1];
+
+                foreach (var aresta in grafo.ObterTodasArestas())
+                {
+                    int c1 = unionFind.Find(aresta.Origem);
+                    int c2 = unionFind.Find(aresta.Destino);
+
+                    if (c1 == c2) continue;
+
+                    if (melhor[c1] == null || aresta.Peso < melhor[c1].Peso)
+                    {
+                        melhor[c1] = aresta;
+                    }
+
+                    if (melhor[c2] == null || aresta.Peso < melhor[c2].Peso)
+                    {
+                        melhor[c2] = aresta;
+                    }
+                }
+
+                bool adicionou = false;
+                for (int i = 1; i <= grafo.NumVertices; i++)
+                {
+                    var aresta = melhor[i];
+                    if (aresta == null) continue;
+
+                    int c1 = unionFind.Find(aresta.Origem);
+                    int c2 = unionFind.Find(aresta.Destino);
+                    if (c1 == c2) continue;
+
+                    resultado.AdicionarAresta(aresta);
+                    unionFind.Union(c1, c2);
+                    adicionou = true;
+                }
+
+                if (!adicionou) break;
+            }
+
+            resultado.ArvoreEncontrada = resultado.Arestas.Count == grafo.NumVertices - 1;
+            medidor.Parar();
+            resultado.TempoExecucao = medidor.ObterTempoDecorrido();
+            return resultado;
         }
 
         /// <summary>
@@ -73,6 +208,8 @@ namespace TP_Grafos
         /// </summary>
         private void OrdenarArestasPorPeso()
         {
+            arestasOrdenadas = grafo.ObterTodasArestas();
+            arestasOrdenadas.Sort();
         }
 
         /// <summary>
@@ -80,9 +217,24 @@ namespace TP_Grafos
         /// </summary>
         /// <param name="componente">O identificador do componente.</param>
         /// <returns>A aresta de peso mínimo.</returns>
-        private Aresta ObterArestaMinimaComponente(int componente)
+        private Aresta? ObterArestaMinimaComponente(int componente)
         {
-            return null;
+            Aresta? melhor = null;
+            foreach (var aresta in grafo.ObterTodasArestas())
+            {
+                int c1 = unionFind.Find(aresta.Origem);
+                int c2 = unionFind.Find(aresta.Destino);
+                if (c1 == c2) continue;
+                if (c1 == componente || c2 == componente)
+                {
+                    if (melhor == null || aresta.Peso < melhor.Peso)
+                    {
+                        melhor = aresta;
+                    }
+                }
+            }
+
+            return melhor;
         }
 
         /// <summary>
@@ -91,7 +243,7 @@ namespace TP_Grafos
         /// <returns>True se o grafo for conexo, false caso contrário.</returns>
         private bool VerificarConectividade()
         {
-            return false;
+            return grafo.EhConexo();
         }
     }
 }

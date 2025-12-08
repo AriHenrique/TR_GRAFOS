@@ -29,6 +29,12 @@ namespace TP_Grafos
         /// <param name="nomeBase">O nome base para o arquivo de log.</param>
         public ArquivoLog(string nomeBase)
         {
+            var pasta = Path.Combine(AppContext.BaseDirectory, "logs");
+            Directory.CreateDirectory(pasta);
+
+            caminhoLog = Path.Combine(pasta, $"{nomeBase}_{DateTime.Now:yyyyMMdd_HHmmss}.log");
+            writer = new StreamWriter(caminhoLog, append: false) { AutoFlush = true };
+            EscreverInfo($"Log iniciado em {DateTime.Now}");
         }
 
         /// <summary>
@@ -37,6 +43,10 @@ namespace TP_Grafos
         /// <param name="mensagem">A mensagem a ser escrita.</param>
         public void Escrever(string mensagem)
         {
+            lock (lockObj)
+            {
+                writer.WriteLine(mensagem);
+            }
         }
 
         /// <summary>
@@ -46,6 +56,9 @@ namespace TP_Grafos
         /// <param name="resultado">O objeto de resultado.</param>
         public void EscreverResultado(string problema, object resultado)
         {
+            Escrever($"[{DateTime.Now:HH:mm:ss}] Resultado - {problema}");
+            Escrever(resultado?.ToString() ?? "sem resultado");
+            Escrever(new string('-', 50));
         }
 
         /// <summary>
@@ -55,6 +68,11 @@ namespace TP_Grafos
         /// <param name="ex">A exceção (opcional).</param>
         public void EscreverErro(string erro, Exception ex = null)
         {
+            Escrever($"ERRO: {erro}");
+            if (ex != null)
+            {
+                Escrever(ex.ToString());
+            }
         }
 
         /// <summary>
@@ -63,6 +81,7 @@ namespace TP_Grafos
         /// <param name="info">A mensagem de informação.</param>
         public void EscreverInfo(string info)
         {
+            Escrever($"INFO: {info}");
         }
 
         /// <summary>
@@ -70,6 +89,10 @@ namespace TP_Grafos
         /// </summary>
         public void Flush()
         {
+            lock (lockObj)
+            {
+                writer.Flush();
+            }
         }
 
         /// <summary>
@@ -77,6 +100,11 @@ namespace TP_Grafos
         /// </summary>
         public void Fechar()
         {
+            lock (lockObj)
+            {
+                writer.Flush();
+                writer.Dispose();
+            }
         }
 
         /// <summary>
@@ -85,7 +113,8 @@ namespace TP_Grafos
         /// <returns>O conteúdo do log.</returns>
         public string LerLog()
         {
-            return "";
+            writer.Flush();
+            return File.ReadAllText(caminhoLog);
         }
 
         /// <summary>
@@ -93,6 +122,8 @@ namespace TP_Grafos
         /// </summary>
         public void LimparLog()
         {
+            writer.Flush();
+            File.WriteAllText(caminhoLog, string.Empty);
         }
     }
 }

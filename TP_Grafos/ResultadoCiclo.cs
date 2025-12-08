@@ -42,6 +42,8 @@ namespace TP_Grafos
         /// </summary>
         public ResultadoCiclo()
         {
+            Sequencia = new List<int>();
+            TipoCiclo = string.Empty;
         }
 
         /// <summary>
@@ -50,6 +52,7 @@ namespace TP_Grafos
         /// <param name="vertice">O vértice a ser adicionado.</param>
         public void AdicionarVertice(int vertice)
         {
+            Sequencia.Add(vertice);
         }
 
         /// <summary>
@@ -58,7 +61,12 @@ namespace TP_Grafos
         /// <returns>A string que representa o resultado.</returns>
         public override string ToString()
         {
-            return "";
+            if (!ExisteCiclo)
+            {
+                return $"{TipoCiclo}: inexistente.";
+            }
+
+            return $"{TipoCiclo}: {string.Join(" -> ", Sequencia)} | Vértices visitados: {NumeroVerticesVisitados} | Arestas: {NumeroArestasPercorridas} | Tempo: {TempoExecucao:F2} ms";
         }
 
         /// <summary>
@@ -67,7 +75,7 @@ namespace TP_Grafos
         /// <returns>A string JSON.</returns>
         public string ToJson()
         {
-            return "";
+            return System.Text.Json.JsonSerializer.Serialize(this);
         }
     }
 }

@@ -27,6 +27,7 @@ namespace TP_Grafos
         /// </summary>
         public MedidorPerformance()
         {
+            cronometro = new Stopwatch();
         }
 
         /// <summary>
@@ -34,6 +35,10 @@ namespace TP_Grafos
         /// </summary>
         public void Iniciar()
         {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            memoriaInicial = GC.GetTotalMemory(true);
+            cronometro.Restart();
         }
 
         /// <summary>
@@ -41,6 +46,8 @@ namespace TP_Grafos
         /// </summary>
         public void Parar()
         {
+            cronometro.Stop();
+            memoriaFinal = GC.GetTotalMemory(true);
         }
 
         /// <summary>
@@ -49,7 +56,7 @@ namespace TP_Grafos
         /// <returns>O tempo decorrido.</returns>
         public double ObterTempoDecorrido()
         {
-            return 0;
+            return cronometro.Elapsed.TotalMilliseconds;
         }
 
         /// <summary>
@@ -58,7 +65,7 @@ namespace TP_Grafos
         /// <returns>A quantidade de memória utilizada.</returns>
         public long ObterUsoMemoria()
         {
-            return 0;
+            return memoriaFinal - memoriaInicial;
         }
 
         /// <summary>
@@ -67,7 +74,7 @@ namespace TP_Grafos
         /// <returns>As estatísticas de performance.</returns>
         public string GerarEstatisticas()
         {
-            return "";
+            return $"Tempo: {ObterTempoDecorrido():F2} ms | Memória: {ObterUsoMemoria()} bytes";
         }
     }
 }

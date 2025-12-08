@@ -30,6 +30,11 @@ namespace TP_Grafos
         /// <param name="nomeBase">O nome base do arquivo.</param>
         public GeradorRelatorio(string nomeBase)
         {
+            nomeArquivo = nomeBase;
+            dataGeracao = DateTime.Now;
+            conteudo = new StringBuilder();
+            conteudo.AppendLine($"Relatório - {nomeArquivo} - {dataGeracao}");
+            conteudo.AppendLine(new string('=', 60));
         }
 
         /// <summary>
@@ -39,6 +44,10 @@ namespace TP_Grafos
         /// <param name="conteudo">O conteúdo da seção.</param>
         public void AdicionarSecao(string titulo, string conteudo)
         {
+            this.conteudo.AppendLine(titulo);
+            this.conteudo.AppendLine(new string('-', titulo.Length));
+            this.conteudo.AppendLine(conteudo);
+            this.conteudo.AppendLine();
         }
 
         /// <summary>
@@ -48,6 +57,7 @@ namespace TP_Grafos
         /// <param name="resultado">O objeto de resultado.</param>
         public void AdicionarResultado(string problema, object resultado)
         {
+            AdicionarSecao(problema, resultado?.ToString() ?? "Sem resultado");
         }
 
         /// <summary>
@@ -57,6 +67,7 @@ namespace TP_Grafos
         /// <param name="dados">Os dados para o gráfico.</param>
         public void AdicionarGrafico(string tipo, object dados)
         {
+            AdicionarSecao($"Gráfico {tipo}", "Geração de gráfico não implementada.");
         }
 
         /// <summary>
@@ -66,6 +77,13 @@ namespace TP_Grafos
         /// <param name="dados">Os dados da tabela (lista de linhas).</param>
         public void AdicionarTabela(string titulo, List<List<string>> dados)
         {
+            var sb = new StringBuilder();
+            foreach (var linha in dados)
+            {
+                sb.AppendLine(string.Join(" | ", linha));
+            }
+
+            AdicionarSecao(titulo, sb.ToString());
         }
 
         /// <summary>
@@ -74,6 +92,12 @@ namespace TP_Grafos
         /// <param name="resultados">A lista de resultados das análises.</param>
         public void GerarRelatorioTexto(List<object> resultados)
         {
+            foreach (var r in resultados)
+            {
+                AdicionarResultado("Resultado", r);
+            }
+
+            SalvarRelatorio();
         }
 
         /// <summary>
@@ -82,6 +106,8 @@ namespace TP_Grafos
         /// <param name="resultados">A lista de resultados das análises.</param>
         public void GerarRelatorioHTML(List<object> resultados)
         {
+            // Placeholder: reutiliza texto
+            GerarRelatorioTexto(resultados);
         }
 
         /// <summary>
@@ -90,6 +116,8 @@ namespace TP_Grafos
         /// <param name="resultados">A lista de resultados das análises.</param>
         public void GerarRelatorioPDF(List<object> resultados)
         {
+            // Placeholder: reutiliza texto
+            GerarRelatorioTexto(resultados);
         }
 
         /// <summary>
@@ -98,6 +126,9 @@ namespace TP_Grafos
         /// <param name="resultados">A lista de resultados das análises.</param>
         public void GerarRelatorioJSON(List<object> resultados)
         {
+            var json = System.Text.Json.JsonSerializer.Serialize(resultados);
+            conteudo.AppendLine(json);
+            SalvarRelatorio();
         }
 
         /// <summary>
@@ -106,7 +137,11 @@ namespace TP_Grafos
         /// <returns>O caminho do arquivo salvo.</returns>
         public string SalvarRelatorio()
         {
-            return "";
+            var pasta = Path.Combine(AppContext.BaseDirectory, "relatorios");
+            Directory.CreateDirectory(pasta);
+            var caminho = Path.Combine(pasta, $"{nomeArquivo}_{dataGeracao:yyyyMMdd_HHmmss}.txt");
+            File.WriteAllText(caminho, conteudo.ToString());
+            return caminho;
         }
     }
 }
