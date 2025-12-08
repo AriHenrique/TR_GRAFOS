@@ -135,7 +135,7 @@ namespace TP_Grafos
 
             if (usarMatriz && matrizAdjacencia != null)
             {
-                matrizAdjacencia[origem, destino] = 0; // Ou infinito/null dependendo da lógica
+                matrizAdjacencia[origem, destino] = 0;
                 matrizCapacidade[origem, destino] = 0;
             }
         }
@@ -227,10 +227,9 @@ namespace TP_Grafos
             
             var visitados = new HashSet<int>();
             var fila = new Queue<int>();
-            
-            // Começa do primeiro vértice disponível
+
             int inicio = listaAdjacencia.Keys.FirstOrDefault();
-            if (inicio == 0) return false; // Grafo vazio ou inválido
+            if (inicio == 0) return false;
 
             fila.Enqueue(inicio);
             visitados.Add(inicio);
@@ -240,9 +239,6 @@ namespace TP_Grafos
                 var u = fila.Dequeue();
                 foreach (var aresta in ObterVizinhos(u))
                 {
-                    // Considerando conexidade fraca (grafo não direcionado para fins de travessia)
-                    // Se for fortemente conexo, a lógica seria mais complexa (Kosaraju/Tarjan)
-                    // Mas para grafo geral, BFS simples:
                     if (!visitados.Contains(aresta.Destino))
                     {
                         visitados.Add(aresta.Destino);
@@ -251,9 +247,6 @@ namespace TP_Grafos
                 }
             }
 
-            // Nota: Para grafos direcionados, isso testa apenas acessibilidade a partir da raiz.
-            // Para verificar se é "fortemente conexo", seriam necessárias duas passadas.
-            // Assumindo verificação simples de componentes conexos para grafo não direcionado ou fracamente conexo.
             return visitados.Count == numVertices;
         }
 

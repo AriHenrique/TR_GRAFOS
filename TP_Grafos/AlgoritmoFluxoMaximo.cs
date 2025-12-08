@@ -83,7 +83,6 @@ namespace TP_Grafos
             resultado.TempoExecucao = medidor.ObterTempoDecorrido();
             resultado.FluxoMaximo = fluxoTotal;
 
-            // Calcular fluxo por aresta
             for (int i = 1; i <= grafo.NumVertices; i++)
             {
                 for (int j = 1; j <= grafo.NumVertices; j++)
@@ -95,7 +94,6 @@ namespace TP_Grafos
                 }
             }
 
-            // Encontrar corte mínimo
             resultado.CorteMinimo = EncontrarCorteMinimo(origem, destino);
 
             return resultado;
@@ -127,15 +125,13 @@ namespace TP_Grafos
             while (BFS(origem, destino))
             {
                 double fluxoAumentante = double.PositiveInfinity;
-                
-                // Encontrar o fluxo mínimo no caminho
+
                 for (int v = destino; v != origem; v = pai[v])
                 {
                     int u = pai[v];
                     fluxoAumentante = Math.Min(fluxoAumentante, capacidadeResidual[u, v]);
                 }
 
-                // Atualizar o fluxo
                 for (int v = destino; v != origem; v = pai[v])
                 {
                     int u = pai[v];
@@ -152,7 +148,6 @@ namespace TP_Grafos
             resultado.TempoExecucao = medidor.ObterTempoDecorrido();
             resultado.FluxoMaximo = fluxoTotal;
 
-            // Calcular fluxo por aresta
             for (int i = 1; i <= grafo.NumVertices; i++)
             {
                 for (int j = 1; j <= grafo.NumVertices; j++)
@@ -164,7 +159,6 @@ namespace TP_Grafos
                 }
             }
 
-            // Encontrar corte mínimo
             resultado.CorteMinimo = EncontrarCorteMinimo(origem, destino);
 
             return resultado;
@@ -236,13 +230,13 @@ namespace TP_Grafos
                         capacidadeResidual[v, origem] += fluxoEncontrado;
                         fluxo[origem, v] += fluxoEncontrado;
                         fluxo[v, origem] -= fluxoEncontrado;
-                        visitado[origem] = false; // Reset para permitir outros caminhos
+                        visitado[origem] = false;
                         return fluxoEncontrado;
                     }
                 }
             }
 
-            visitado[origem] = false; // Reset ao retornar
+            visitado[origem] = false;
             return 0;
         }
 
@@ -254,7 +248,6 @@ namespace TP_Grafos
         /// <returns>O valor do fluxo que pode ser enviado pelo caminho.</returns>
         private double EncontrarCaminhoAumentante(int origem, int destino)
         {
-            // Reset visitado antes de cada busca
             for (int i = 1; i <= grafo.NumVertices; i++)
                 visitado[i] = false;
 
@@ -269,7 +262,6 @@ namespace TP_Grafos
         /// <param name="valorFluxo">O valor do fluxo a ser atualizado.</param>
         private void AtualizarFluxo(int origem, int destino, double valorFluxo)
         {
-            // O fluxo já foi atualizado no DFS
         }
 
         /// <summary>
@@ -282,7 +274,6 @@ namespace TP_Grafos
         {
             var corte = new List<Aresta>();
 
-            // Fazer BFS no grafo residual para encontrar vértices alcançáveis
             for (int i = 1; i <= grafo.NumVertices; i++)
                 visitado[i] = false;
 
@@ -303,7 +294,6 @@ namespace TP_Grafos
                 }
             }
 
-            // Arestas do corte são aquelas que vão de vértices visitados para não visitados
             for (int i = 1; i <= grafo.NumVertices; i++)
             {
                 for (int j = 1; j <= grafo.NumVertices; j++)
@@ -324,8 +314,7 @@ namespace TP_Grafos
         private void ConstruirGrafoResidual()
         {
             int n = grafo.NumVertices;
-            
-            // Inicializar matrizes
+
             for (int i = 1; i <= n; i++)
             {
                 for (int j = 1; j <= n; j++)
@@ -335,7 +324,6 @@ namespace TP_Grafos
                 }
             }
 
-            // Preencher com capacidades do grafo
             var todasArestas = grafo.ObterTodasArestas();
             foreach (var aresta in todasArestas)
             {
