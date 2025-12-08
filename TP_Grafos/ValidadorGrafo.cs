@@ -1,89 +1,118 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace TP_Grafos
 {
-    /// <summary>
-    /// Fornece métodos estáticos para validar diferentes aspectos de um grafo.
-    /// </summary>
     public static class ValidadorGrafo
     {
-        /// <summary>
-        /// Valida o formato de um arquivo DIMACS.
-        /// </summary>
-        /// <param name="arquivo">O caminho do arquivo.</param>
-        /// <returns>True se o formato for válido, false caso contrário.</returns>
+        private static List<string> erros = new List<string>();
+
         public static bool ValidarFormatoDIMACS(string arquivo)
         {
-            return false;
+            erros.Clear();
+            if (!File.Exists(arquivo))
+            {
+                erros.Add("Arquivo não encontrado.");
+                return false;
+            }
+
+            var linhas = File.ReadAllLines(arquivo);
+            bool temCabecalho = false;
+            foreach (var linha in linhas)
+            {
+                if (linha.StartsWith("p "))
+                {
+                    temCabecalho = true;
+                    break;
+                }
+            }
+
+            if (!temCabecalho)
+                erros.Add("Cabeçalho 'p' do formato DIMACS não encontrado.");
+
+            return erros.Count == 0;
         }
 
-        /// <summary>
-        /// Valida se o grafo é conexo.
-        /// </summary>
-        /// <param name="grafo">O grafo a ser validado.</param>
-        /// <returns>True se for conexo, false caso contrário.</returns>
         public static bool ValidarConectividade(Grafo grafo)
         {
-            return false;
+            bool conexo = grafo.EhConexo();
+            if (!conexo) erros.Add("O grafo não é conexo.");
+            return conexo;
         }
 
-        /// <summary>
-        /// Valida se todos os pesos das arestas são positivos.
-        /// </summary>
-        /// <param name="grafo">O grafo a ser validado.</param>
-        /// <returns>True se todos os pesos forem positivos, false caso contrário.</returns>
         public static bool ValidarPesosPositivos(Grafo grafo)
         {
-            return false;
+            var arestas = grafo.ObterTodasArestas();
+            bool valido = arestas.All(a => a.Peso >= 0);
+            if (!valido) erros.Add("Existem arestas com pesos negativos.");
+            return valido;
         }
 
-        /// <summary>
-        /// Valida se as capacidades das arestas são válidas (não negativas).
-        /// </summary>
-        /// <param name="grafo">O grafo a ser validado.</param>
-        /// <returns>True se as capacidades forem válidas, false caso contrário.</returns>
         public static bool ValidarCapacidades(Grafo grafo)
         {
-            return false;
+            var arestas = grafo.ObterTodasArestas();
+            bool valido = arestas.All(a => a.Capacidade >= 0);
+            if (!valido) erros.Add("Existem arestas com capacidades negativas.");
+            return valido;
         }
 
-        /// <summary>
-        /// Valida se o grafo atende às condições para ser Euleriano.
-        /// </summary>
-        /// <param name="grafo">O grafo a ser validado.</param>
-        /// <returns>True se for Euleriano, false caso contrário.</returns>
         public static bool ValidarGrafoEuleriano(Grafo grafo)
         {
-            return false;
+            // Um grafo conexo é Euleriano se todos os vértices têm grau par (Ciclo)
+            // Ou se tem exatamente 0 ou 2 vértices de grau ímpar (Caminho/Trilha)
+            // Assumindo verificação para Ciclo Euleriano (Teorema de Euler)
+            if (!grafo.EhConexo()) return false;
+
+            int impares = 0;
+            for (int i = 1; i <= grafo.NumVertices; i++)
+            {
+                if (grafo.ObterGrauVertice(i) % 2 != 0)
+                    impares++;
+            }
+            
+            bool euleriano = (impares == 0);
+            if (!euleriano) erros.Add($"Grafo não é Euleriano. Número de vértices com grau ímpar: {impares}");
+            return euleriano;
         }
 
-        /// <summary>
-        /// Valida se o grafo atende a alguma condição necessária para ser Hamiltoniano.
-        /// </summary>
-        /// <param name="grafo">O grafo a ser validado.</param>
-        /// <returns>True se as condições forem atendidas, false caso contrário.</returns>
         public static bool ValidarGrafoHamiltoniano(Grafo grafo)
         {
-            return false;
+            // Verificar se é Hamiltoniano é NP-Completo.
+            // Aqui verificamos a condição necessária (mas não suficiente) do Teorema de Dirac
+            // Se n >= 3 e grau(v) >= n/2 para todo v, então é Hamiltoniano.
+            
+            int n = grafo.NumVertices;
+            if (n < 3) return true; // Trivial
+
+            bool atendeDirac = true;
+            for (int i = 1; i <= n; i++)
+            {
+                if (grafo.ObterGrauVertice(i) < n / 2.0)
+                {
+                    atendeDirac = false;
+                    break;
+                }
+            }
+
+            if (!atendeDirac)
+                erros.Add("O grafo não atende a condição suficiente de Dirac para ser Hamiltoniano (não garante que não seja).");
+            
+            return atendeDirac;
         }
 
-        /// <summary>
-        /// Obtém a lista de erros de validação encontrados.
-        /// </summary>
-        /// <returns>Uma lista de strings descrevendo os erros.</returns>
         public static List<string> ObterErros()
         {
-            return null;
+            return erros;
         }
 
-        /// <summary>
-        /// Gera um relatório de validação para o grafo.
-        /// </summary>
-        /// <param name="grafo">O grafo a ser validado.</param>
-        /// <returns>Uma string contendo o relatório de validação.</returns>
         public static string GerarRelatorioValidacao(Grafo grafo)
         {
-            return "";
+            erros.Clear();
+            ValidarConectividade(grafo);
+            ValidarPesosPositivos(grafo);
+            return string.Join(Environment.NewLine, erros);
         }
     }
 }

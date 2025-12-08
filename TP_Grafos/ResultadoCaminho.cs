@@ -1,68 +1,51 @@
 using System.Collections.Generic;
+using System.Text;
 
 namespace TP_Grafos
 {
-    /// <summary>
-    /// Armazena o resultado da execução de um algoritmo de caminho mínimo.
-    /// </summary>
     public class ResultadoCaminho
     {
-        /// <summary>
-        /// Lista de vértices que compõem o caminho.
-        /// </summary>
         public List<int> Caminho { get; set; }
-
-        /// <summary>
-        /// Custo total do caminho.
-        /// </summary>
         public double CustoTotal { get; set; }
-
-        /// <summary>
-        /// Indica se um caminho foi encontrado.
-        /// </summary>
         public bool CaminhoEncontrado { get; set; }
-
-        /// <summary>
-        /// Tempo de execução do algoritmo.
-        /// </summary>
         public double TempoExecucao { get; set; }
-
-        /// <summary>
-        /// Nome do algoritmo utilizado.
-        /// </summary>
         public string AlgoritmoUsado { get; set; }
 
-        /// <summary>
-        /// Construtor padrão.
-        /// </summary>
         public ResultadoCaminho()
         {
+            Caminho = new List<int>();
         }
 
-        /// <summary>
-        /// Adiciona um vértice ao caminho.
-        /// </summary>
-        /// <param name="vertice">O vértice a ser adicionado.</param>
         public void AdicionarVertice(int vertice)
         {
+            Caminho.Add(vertice);
         }
 
-        /// <summary>
-        /// Retorna uma representação do resultado em string.
-        /// </summary>
-        /// <returns>A string que representa o resultado.</returns>
         public override string ToString()
         {
-            return "";
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"--- Resultado Caminho Mínimo ({AlgoritmoUsado}) ---");
+            sb.AppendLine($"Tempo de Execução: {TempoExecucao} ms");
+            sb.AppendLine($"Caminho Encontrado: {CaminhoEncontrado}");
+            
+            if (CaminhoEncontrado)
+            {
+                sb.AppendLine($"Custo Total: {CustoTotal}");
+                sb.AppendLine($"Caminho: {string.Join(" -> ", Caminho)}");
+            }
+            return sb.ToString();
         }
 
-        /// <summary>
-        /// Converte o resultado para o formato JSON.
-        /// </summary>
-        /// <returns>A string JSON.</returns>
         public string ToJson()
         {
-            return "";
+            string caminhoJson = CaminhoEncontrado ? "[" + string.Join(",", Caminho) + "]" : "[]";
+            return $@"{{
+                ""algoritmo"": ""{AlgoritmoUsado}"",
+                ""encontrado"": {CaminhoEncontrado.ToString().ToLower()},
+                ""custo"": {CustoTotal},
+                ""tempo_ms"": {TempoExecucao},
+                ""caminho"": {caminhoJson}
+            }}";
         }
     }
 }
