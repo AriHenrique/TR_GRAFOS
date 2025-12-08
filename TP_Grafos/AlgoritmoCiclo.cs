@@ -43,6 +43,10 @@ namespace TP_Grafos
         /// <param name="grafo">O grafo.</param>
         public AlgoritmoCiclo(Grafo grafo)
         {
+            this.grafo = grafo;
+            visitado = new bool[grafo.NumVertices];
+            pilha = new Stack<int>();
+            caminho = new List<int>();
         }
 
         /// <summary>
@@ -51,7 +55,19 @@ namespace TP_Grafos
         /// <returns>O resultado da busca pelo ciclo.</returns>
         public ResultadoCiclo VerificarCicloEuleriano()
         {
-            return null;
+            ResultadoCiclo resultado = new ResultadoCiclo();
+
+            if (!TemCicloEuleriano())
+            {
+                resultado.ExisteCiclo = false;
+                return resultado;
+            }
+
+            List<int> ciclo = EncontrarCicloEuleriano();
+            resultado.ExisteCiclo = true;
+            resultado.Sequencia = ciclo;
+
+            return resultado;
         }
 
         /// <summary>
@@ -60,7 +76,20 @@ namespace TP_Grafos
         /// <returns>O resultado da busca pelo ciclo.</returns>
         public ResultadoCiclo VerificarCicloHamiltoniano()
         {
-            return null;
+            ResultadoCiclo resultado = new ResultadoCiclo();
+
+            if (!TemCicloHamiltoniano())
+            {
+                resultado.ExisteCiclo = false;
+                return resultado;
+            }
+
+            List<int> ciclo = EncontrarCicloHamiltoniano(0);
+
+            resultado.ExisteCiclo = ciclo != null;
+            resultado.Sequencia = ciclo;
+
+            return resultado;
         }
 
         /// <summary>
@@ -69,7 +98,12 @@ namespace TP_Grafos
         /// <returns>True se as condições são satisfeitas, false caso contrário.</returns>
         private bool TemCicloEuleriano()
         {
-            return false;
+            for (int i = 0; i < grafo.NumVertices; i++)
+            {
+                if (grafo.Grau(i) % 2 != 0)
+                    return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -78,7 +112,7 @@ namespace TP_Grafos
         /// <returns>A lista de vértices no ciclo.</returns>
         private List<int> EncontrarCicloEuleriano()
         {
-            return null;
+            return Hierholzer(0);
         }
 
         /// <summary>
@@ -88,7 +122,40 @@ namespace TP_Grafos
         /// <returns>A lista de vértices no ciclo.</returns>
         private List<int> Hierholzer(int inicio)
         {
-            return null;
+            Stack<int> pilha = new Stack<int>();
+            List<int> ciclo = new List<int>();
+
+            // Cópia local das adjacências
+            List<int>[] adj = new List<int>[grafo.NumVertices];
+            for (int i = 0; i < grafo.NumVertices; i++)
+            {
+                adj[i] = new List<int>(grafo.Adjacencias[i]);
+            }
+
+            pilha.Push(inicio);
+
+            while (pilha.Count > 0)
+            {
+                int v = pilha.Peek();
+
+                if (adj[v].Count > 0)
+                {
+                    int u = adj[v][0];
+
+                    //Remove apenas a aresta v → u (grafo direcionado)
+                    adj[v].RemoveAt(0);
+
+                    pilha.Push(u);
+                }
+                else
+                {
+                    ciclo.Add(v);
+                    pilha.Pop();
+                }
+            }
+
+            ciclo.Reverse();
+            return ciclo;
         }
 
         /// <summary>
@@ -97,7 +164,10 @@ namespace TP_Grafos
         /// <returns>True se as condições são satisfeitas, false caso contrário.</returns>
         private bool TemCicloHamiltoniano()
         {
-            return false;
+            for (int i = 0; i < grafo.NumVertices; i++)
+                visitado[i] = false;
+
+            return true;
         }
 
         /// <summary>
@@ -107,6 +177,16 @@ namespace TP_Grafos
         /// <returns>A lista de vértices no ciclo.</returns>
         private List<int> EncontrarCicloHamiltoniano(int inicio)
         {
+            List<int> caminhoHamiltoniano = new List<int>();
+            caminhoHamiltoniano.Add(inicio);
+            visitado[inicio] = true;
+
+            if (BacktrackHamiltoniano(caminhoHamiltoniano, 1))
+            {
+                caminhoHamiltoniano.Add(inicio); // Fecha o ciclo
+                return caminhoHamiltoniano;
+            }
+
             return null;
         }
 
@@ -118,6 +198,28 @@ namespace TP_Grafos
         /// <returns>True se um ciclo foi encontrado, false caso contrário.</returns>
         private bool BacktrackHamiltoniano(List<int> caminho, int pos)
         {
+            if (pos == grafo.NumVertices)
+            {
+                return grafo.ExisteAresta(caminho[pos - 1], caminho[0]);
+            }
+
+            int ultimo = caminho[pos - 1];
+
+            foreach (int v in grafo.Adjacentes(ultimo))
+            {
+                if (!visitado[v])
+                {
+                    visitado[v] = true;
+                    caminho.Add(v);
+
+                    if (BacktrackHamiltoniano(caminho, pos + 1))
+                        return true;
+
+                    visitado[v] = false;
+                    caminho.RemoveAt(caminho.Count - 1);
+                }
+            }
+
             return false;
         }
 
@@ -127,7 +229,12 @@ namespace TP_Grafos
         /// <returns>True se todos foram visitados, false caso contrário.</returns>
         private bool TodosVerticesVisitados()
         {
-            return false;
+            for (int i = 0; i < visitado.Length; i++)
+            {
+                if (!visitado[i])
+                    return false;
+            }
+            return true;
         }
     }
 }
