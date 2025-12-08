@@ -1,0 +1,44 @@
+RELATÓRIO DE ANÁLISE DE GRAFOS
+Data de geração: 08/12/2025 20:48:38
+==================================================
+
+RELATÓRIO COMPLETO - TODOS OS GRAFOS
+------------------------------------
+Data e hora: 08/12/2025 20:48:38
+Total de arquivos processados: 7
+
+GRAFO: GRAFO01.DIMACS
+---------------------
+Vértices: 6, Arestas: 12
+Tempo total: 20,65 ms
+
+GRAFO: GRAFO02.DIMACS
+---------------------
+Vértices: 5, Arestas: 6
+Tempo total: 3,51 ms
+
+GRAFO: GRAFO03.DIMACS
+---------------------
+Vértices: 8, Arestas: 10
+Tempo total: 2,79 ms
+
+GRAFO: GRAFO04.DIMACS
+---------------------
+Vértices: 10, Arestas: 15
+Tempo total: 2,52 ms
+
+GRAFO: GRAFO05.DIMACS
+---------------------
+Vértices: 10, Arestas: 30
+Tempo total: 3,59 ms
+
+GRAFO: GRAFO06.DIMACS
+---------------------
+Vértices: 50, Arestas: 200
+Tempo total: 2,57 ms
+
+GRAFO: GRAFO07.DIMACS
+---------------------
+Vértices: 100, Arestas: 400
+Tempo total: 2,66 ms
+
