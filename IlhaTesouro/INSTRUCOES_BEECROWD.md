@@ -1,12 +1,9 @@
-# 📝 Instruções para Submissão no Beecrowd
+# Instruções para submissão no Beecrowd
 
-## 🎯 Problema: 2098 - Ilha do Tesouro
+## Problema 2098 — Ilha do Tesouro
 
-### 📋 Código para Submissão
-
-**Arquivo**: `Program.cs` ⭐
-
-Abra o arquivo `Program.cs` do projeto e copie TODO o conteúdo, ou use o código abaixo:
+### Código para envio
+Envie exatamente o conteúdo abaixo no arquivo `Program.cs` (classe deve se chamar `URI` e não deve ter namespace):
 
 ```csharp
 using System;
@@ -106,124 +103,63 @@ class URI {
 
 ---
 
-## 🚀 Passo a Passo para Submissão
-
-### 1️⃣ Acessar o Problema
-- URL: https://judge.beecrowd.com/pt/problems/view/2098
-- Faça login na sua conta Beecrowd
-
-### 2️⃣ Selecionar Linguagem
-- Clique em **"Enviar"** ou **"Submit"**
-- Selecione **"C# (mono 6.8)"** na lista de linguagens
-
-### 3️⃣ Colar o Código
-- Copie **TODO** o código acima (desde `using System;` até o último `}`)
-- Cole na área de texto do Beecrowd
-- **IMPORTANTE**: Use exatamente como está, incluindo `class URI`
-
-### 4️⃣ Submeter
-- Clique em **"Enviar"** / **"Submit"**
-- Aguarde o julgamento
+### Passo a passo de envio
+1) Acesse https://judge.beecrowd.com/pt/problems/view/2098 e faça login.
+2) Clique em "Enviar/Submit" e escolha a linguagem **C# (mono 6.8)**.
+3) Cole todo o código acima (desde `using System;` até o último `}`) e envie.
 
 ---
 
-## ✅ Resultados Esperados
+### Resultados esperados
 
-| Teste | Entrada | Saída Esperada | Status |
-|-------|---------|----------------|--------|
-| 1 | 3×3 (2-6) | 1 | ✅ |
-| 2 | 3×3 (1-5) | -1 | ✅ |
-| 3 | 3×2 (314-1M) | 310 | ✅ |
-
----
-
-## 🧮 Explicação do Algoritmo
-
-### Estratégia: Busca Binária + BFS
-
-1. **Busca Binária no Tempo de Coleta** (0 a 2.000.000 segundos)
-   - Para cada tempo `t`, verifica se é possível chegar ao barco
-
-2. **BFS (Busca em Largura) para Validação**
-   - Simula o caminho de (0,0) até (R-1, C-1)
-   - No passo `k`: célula deve ter altura > `t + k`
-   - Névoa sobe 1 unidade por segundo
-
-### Complexidade
-- **Tempo**: O(log(2.000.000) × R × C) ≈ O(21 × R × C)
-- **Espaço**: O(R × C)
+| Teste | Entrada (resumo) | Saída | Status |
+|-------|------------------|-------|--------|
+| 1 | 3×3 com alturas 2–6 | 1 | Aceito |
+| 2 | 3×3 começando em 1 | -1 | Aceito |
+| 3 | 3×2 com 314–1.000.000 | 310 | Aceito |
 
 ---
 
-## 📊 Casos de Teste Locais
+### Resumo do algoritmo
+- Busca binária no tempo de coleta (0 a 2.000.000).
+- Para cada tempo, roda BFS do canto superior esquerdo ao inferior direito.
+- Uma célula é válida se `altura > tempoInicial + passos`.
+- Complexidade: O(log 2.000.000 × R × C) em tempo e O(R × C) em espaço.
 
-### Teste 1 (Exemplo Básico)
-**Entrada:**
+---
+
+### Casos de teste locais
+**Teste 1**
 ```
 3 3
 2 3 4
 3 4 5
 4 5 6
 ```
-**Saída:** `1`
+Saída: `1`
 
-### Teste 2 (Impossível)
-**Entrada:**
+**Teste 2**
 ```
 3 3
 1 2 3
 2 2 3
 2 4 5
 ```
-**Saída:** `-1`
+Saída: `-1`
 
-### Teste 3 (Alturas Grandes)
-**Entrada:**
+**Teste 3**
 ```
 3 2
 1000000 1000000
 1000000 1000000
 1000000 314
 ```
-**Saída:** `310`
+Saída: `310`
 
 ---
 
-## ⚠️ Pontos de Atenção
-
-1. **Nome da Classe**: DEVE ser `URI` (exigência do Beecrowd)
-2. **Namespace**: Não usar namespace
-3. **Formato de Entrada**: Usar `Console.ReadLine()` e `.Split()`
-4. **Saída**: Apenas o número resultado com `Console.WriteLine()`
-5. **Índices**: Grid começa em (0,0) e termina em (R-1, C-1)
-
----
-
-## 🐛 Solução de Problemas
-
-### Erro de Compilação
-- Verifique se copiou TODO o código
-- Confirme que a classe se chama `URI`
-- Não adicione namespace
-
-### Wrong Answer
-- Teste localmente com os 3 exemplos
-- Verifique os limites da busca binária
-- Confirme a lógica do BFS
-
-### Time Limit Exceeded
-- A complexidade está otimizada
-- Provavelmente não é o caso com este algoritmo
-
----
-
-## 📚 Referências
-
-- **Problema**: https://judge.beecrowd.com/pt/problems/view/2098
-- **Algoritmo**: Busca Binária + BFS (Breadth-First Search)
-- **Categoria**: Grafos, Busca em Malha
-- **Dificuldade**: Média-Alta
-
----
-
-**Boa sorte! 🍀**
+### Pontos de atenção
+- Classe deve se chamar `URI` e não usar namespace.
+- Use apenas `Console.ReadLine()` e `Split()` para a entrada.
+- Imprima somente o número calculado com `Console.WriteLine()`.
+- Início do caminho é (0,0) e fim é (R-1, C-1).
