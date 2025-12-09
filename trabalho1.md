@@ -28,7 +28,7 @@ A Entrega Máxima Logística S.A. precisa de um Sistema de Otimização de Rotas
 - Registro dos resultados para os sete grafos DIMACS em arquivo de log.
 - Relatório técnico com modelagem e interpretação dos resultados.
 
-6. Respostas solicitadas (execução de 08/12/2025)
+5. Respostas solicitadas (execução de 08/12/2025)
 - O relatório `relatorio_todos_grafos_20251208_212631.txt` confirmou o processamento dos sete grafos DIMACS com tempos entre 2,06 ms e 14,52 ms.
 - O grafo mais denso é o **GRAFO01.DIMACS** (6 vértices, 12 arestas), cuja densidade aproximada de 0,40 recomenda o uso de matriz de adjacência; ele também apresentou o maior tempo total de execução (14,52 ms), possivelmente pelo impacto do cálculo completo de todos os algoritmos em uma estrutura mais densa.
 - O grafo mais esparso é o **GRAFO07.DIMACS** (100 vértices, 400 arestas), com densidade próxima de 0,04; aqui, a lista de adjacência é a escolha adequada e o tempo total foi de 4,99 ms mesmo com o maior número de vértices.
@@ -41,7 +41,7 @@ A Entrega Máxima Logística S.A. precisa de um Sistema de Otimização de Rotas
   - **GRAFO06.DIMACS** – 50 vértices, 200 arestas, 2,25 ms, densidade ≈ 0,08 → lista.
   - **GRAFO07.DIMACS** – 100 vértices, 400 arestas, 4,99 ms, densidade ≈ 0,04 → lista.
 
-5. Formato DIMACS
+6. Formato DIMACS
 ```
 <num_vertices> <num_arestas>
 <origem> <destino> <peso> <capacidade>
