@@ -70,5 +70,18 @@ Exemplo:
 3 4 2.0 8
 ```
 
+## Respostas solicitadas (execução de 08/12/2025)
+- O relatório `relatorio_todos_grafos_20251208_212631.txt` confirmou o processamento dos sete grafos DIMACS com tempos entre 2,06 ms e 14,52 ms.
+- O grafo mais denso é o **GRAFO01.DIMACS** (6 vértices, 12 arestas), com densidade aproximada de 0,40, recomendando matriz de adjacência; ele também teve o maior tempo total (14,52 ms) pela execução completa de todos os algoritmos.
+- O grafo mais esparso é o **GRAFO07.DIMACS** (100 vértices, 400 arestas), com densidade próxima de 0,04; a lista de adjacência é a melhor escolha e o tempo total foi de 4,99 ms mesmo com o maior número de vértices.
+- Síntese por grafo com densidade estimada e estrutura sugerida:
+  - **GRAFO01.DIMACS** – 6 vértices, 12 arestas, 14,52 ms, densidade ≈ 0,40 → matriz.
+  - **GRAFO02.DIMACS** – 5 vértices, 6 arestas, 2,23 ms, densidade ≈ 0,30 → matriz se for necessário acesso direto; lista atende bem para inserções.
+  - **GRAFO03.DIMACS** – 8 vértices, 10 arestas, 3,72 ms, densidade ≈ 0,18 → lista.
+  - **GRAFO04.DIMACS** – 10 vértices, 15 arestas, 2,06 ms, densidade ≈ 0,17 → lista.
+  - **GRAFO05.DIMACS** – 10 vértices, 30 arestas, 2,62 ms, densidade ≈ 0,33 → matriz.
+  - **GRAFO06.DIMACS** – 50 vértices, 200 arestas, 2,25 ms, densidade ≈ 0,08 → lista.
+  - **GRAFO07.DIMACS** – 100 vértices, 400 arestas, 4,99 ms, densidade ≈ 0,04 → lista.
+
 ## Contato
 Trabalho acadêmico da disciplina Algoritmos em Grafos da PUC Minas (período 02/2025). Em caso de dúvidas, consulte os membros do grupo pelo Canvas.
