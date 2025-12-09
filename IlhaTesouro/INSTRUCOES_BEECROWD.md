@@ -13,7 +13,6 @@ class URI {
 
     static void Main(string[] args) {
 
-        // Leitura da entrada
         string[] primeira = Console.ReadLine().Split();
         int R = int.Parse(primeira[0]);
         int C = int.Parse(primeira[1]);
@@ -28,11 +27,8 @@ class URI {
                 alturas[i, j] = int.Parse(linha[j]);
             }
         }
-
-        // Processamento - Busca Binária
         int resultado = EncontrarTempoMaximo(R, C, alturas);
 
-        // Saída
         Console.WriteLine(resultado);
     }
 
