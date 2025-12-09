@@ -42,10 +42,42 @@ Saída esperada: `1`
 TR_GRAFOS/
 ├── TP_Grafos/            # Código do sistema logístico
 ├── IlhaTesouro/          # Código do problema 2098
-├── trabalho1.md          # Enunciado resumido do TP de logística
-├── trabalho2.md          # Enunciado resumido do desafio Beecrowd
 └── uml.mmd               # Diagrama em Mermaid
 ```
+
+## Divisão de Tarefas (TP_Grafos)
+
+A implementação do projeto foi dividida entre três integrantes, agrupando as classes por afinidade para minimizar dependências e facilitar o desenvolvimento paralelo.
+
+### Vinicius: Núcleo do Grafo e Algoritmos Base
+Responsável pela estrutura de dados central do projeto e por um conjunto inicial de algoritmos e validações.
+
+- `Aresta.cs`
+- `Grafo.cs`
+- `ValidadorGrafo.cs`
+- `AlgoritmoCaminhoMinimo.cs`
+- `ResultadoCaminho.cs`
+
+### Aristides: Algoritmos Especializados e Estruturas de Dados Auxiliares
+Focado na implementação de algoritmos mais complexos que, em sua maioria, dependem apenas da estrutura base do grafo.
+
+- `UnionFind.cs`
+- `AlgoritmoArvoreGeradora.cs`
+- `ResultadoArvore.cs`
+- `AlgoritmoFluxoMaximo.cs`
+- `ResultadoFluxo.cs`
+
+### Hayanne: Algoritmos Adicionais, Utilitários e Camada de Apresentação
+Encarregado dos algoritmos restantes e de toda a camada de interação com o usuário, medição de performance e geração de relatórios, integrando o trabalho de toda a equipe.
+
+- `AlgoritmoColoracao.cs`
+- `ResultadoColoracao.cs`
+- `AlgoritmoCiclo.cs`
+- `ResultadoCiclo.cs`
+- `MedidorPerformance.cs`
+- `ArquivoLog.cs`
+- `GeradorRelatorio.cs`
+- `Program.cs`
 
 ## Algoritmos utilizados
 - Caminho mínimo: Dijkstra, Bellman-Ford
@@ -83,13 +115,13 @@ Exemplo:
 - O grafo mais denso é o **GRAFO01.DIMACS** (6 vértices, 12 arestas), com densidade aproximada de 0,40, recomendando matriz de adjacência; ele também teve o maior tempo total (14,52 ms) pela execução completa de todos os algoritmos.
 - O grafo mais esparso é o **GRAFO07.DIMACS** (100 vértices, 400 arestas), com densidade próxima de 0,04; a lista de adjacência é a melhor escolha e o tempo total foi de 4,99 ms mesmo com o maior número de vértices.
 - Síntese por grafo com densidade estimada e estrutura sugerida:
-  - **GRAFO01.DIMACS** – 6 vértices, 12 arestas, 14,52 ms, densidade ≈ 0,40 → matriz.
-  - **GRAFO02.DIMACS** – 5 vértices, 6 arestas, 2,23 ms, densidade ≈ 0,30 → matriz se for necessário acesso direto; lista atende bem para inserções.
-  - **GRAFO03.DIMACS** – 8 vértices, 10 arestas, 3,72 ms, densidade ≈ 0,18 → lista.
-  - **GRAFO04.DIMACS** – 10 vértices, 15 arestas, 2,06 ms, densidade ≈ 0,17 → lista.
-  - **GRAFO05.DIMACS** – 10 vértices, 30 arestas, 2,62 ms, densidade ≈ 0,33 → matriz.
-  - **GRAFO06.DIMACS** – 50 vértices, 200 arestas, 2,25 ms, densidade ≈ 0,08 → lista.
-  - **GRAFO07.DIMACS** – 100 vértices, 400 arestas, 4,99 ms, densidade ≈ 0,04 → lista.
+  - **GRAFO01.DIMACS** – 6 vértices, 12 arestas, 14,52 ms, densidade > 0,40 -> matriz.
+  - **GRAFO02.DIMACS** – 5 vértices, 6 arestas, 2,23 ms, densidade > 0,30 -> matriz se for necessário acesso direto; lista atende bem para inserções.
+  - **GRAFO03.DIMACS** – 8 vértices, 10 arestas, 3,72 ms, densidade > 0,18 -> lista.
+  - **GRAFO04.DIMACS** – 10 vértices, 15 arestas, 2,06 ms, densidade > 0,17 -> lista.
+  - **GRAFO05.DIMACS** – 10 vértices, 30 arestas, 2,62 ms, densidade > 0,33 -> matriz.
+  - **GRAFO06.DIMACS** – 50 vértices, 200 arestas, 2,25 ms, densidade > 0,08 -> lista.
+  - **GRAFO07.DIMACS** – 100 vértices, 400 arestas, 4,99 ms, densidade > 0,04 -> lista.
 
 ## Contato
 Trabalho acadêmico da disciplina Algoritmos em Grafos da PUC Minas (período 02/2025). Em caso de dúvidas, consulte os membros do grupo pelo Canvas.
