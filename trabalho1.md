@@ -28,7 +28,20 @@ A Entrega Máxima Logística S.A. precisa de um Sistema de Otimização de Rotas
 - Registro dos resultados para os sete grafos DIMACS em arquivo de log.
 - Relatório técnico com modelagem e interpretação dos resultados.
 
-5. Formato DIMACS
+5. Respostas solicitadas (execução de 08/12/2025)
+- O relatório `relatorio_todos_grafos_20251208_212631.txt` confirmou o processamento dos sete grafos DIMACS com tempos entre 2,06 ms e 14,52 ms.
+- O grafo mais denso é o **GRAFO01.DIMACS** (6 vértices, 12 arestas), cuja densidade aproximada de 0,40 recomenda o uso de matriz de adjacência; ele também apresentou o maior tempo total de execução (14,52 ms), possivelmente pelo impacto do cálculo completo de todos os algoritmos em uma estrutura mais densa.
+- O grafo mais esparso é o **GRAFO07.DIMACS** (100 vértices, 400 arestas), com densidade próxima de 0,04; aqui, a lista de adjacência é a escolha adequada e o tempo total foi de 4,99 ms mesmo com o maior número de vértices.
+- Abaixo, a síntese por grafo com densidade estimada e estrutura sugerida:
+  - **GRAFO01.DIMACS** – 6 vértices, 12 arestas, 14,52 ms, densidade ≈ 0,40 → matriz.
+  - **GRAFO02.DIMACS** – 5 vértices, 6 arestas, 2,23 ms, densidade ≈ 0,30 → matriz se for necessário acesso direto; lista atende bem para inserções.
+  - **GRAFO03.DIMACS** – 8 vértices, 10 arestas, 3,72 ms, densidade ≈ 0,18 → lista.
+  - **GRAFO04.DIMACS** – 10 vértices, 15 arestas, 2,06 ms, densidade ≈ 0,17 → lista.
+  - **GRAFO05.DIMACS** – 10 vértices, 30 arestas, 2,62 ms, densidade ≈ 0,33 → matriz.
+  - **GRAFO06.DIMACS** – 50 vértices, 200 arestas, 2,25 ms, densidade ≈ 0,08 → lista.
+  - **GRAFO07.DIMACS** – 100 vértices, 400 arestas, 4,99 ms, densidade ≈ 0,04 → lista.
+
+6. Formato DIMACS
 ```
 <num_vertices> <num_arestas>
 <origem> <destino> <peso> <capacidade>
