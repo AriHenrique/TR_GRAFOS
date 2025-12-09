@@ -70,6 +70,14 @@ Exemplo:
 3 4 2.0 8
 ```
 
+## Verificação de atendimento aos requisitos
+- **Equipe e linguagem**: solução em C# (.NET 8) estruturada na solução `TP_Grafos.sln`, com os trabalhos organizados em `TP_Grafos` e `IlhaTesouro`.
+- **Modelagem e entrada DIMACS**: o grafo direcionado e ponderado é carregado a partir de arquivos DIMACS com custo e capacidade, calculando a densidade para decidir entre matriz e lista de adjacência automaticamente (`Grafo.cs`).
+- **Problemas previstos no enunciado**: o menu interativo disponibiliza caminho de menor custo, fluxo máximo/corte mínimo, árvore geradora mínima, coloração (turnos de manutenção) e ciclos Euler/Hamilton para inspeções (`Program.cs`).
+- **Algoritmos estudados em sala**: implementações de Dijkstra/Bellman-Ford, Ford-Fulkerson/Edmonds-Karp, Kruskal/Prim/Boruvka, heurísticas de coloração e detecção de ciclos são expostas em classes dedicadas (`Algoritmo*`).
+- **Execução e logging para os 7 grafos**: a opção padrão processa automaticamente todos os arquivos de `grafos_dimacs`, executa as análises e gera relatórios de log com tempo total por grafo (`Program.cs`, `GeradorRelatorio.cs`, `ArquivoLog.cs`).
+- **Relatório técnico e respostas**: os tempos, densidades e estruturas sugeridas para cada grafo do relatório consolidado estão resumidos acima; relatórios completos também podem ser gerados via menu para entrega.
+
 ## Respostas solicitadas (execução de 08/12/2025)
 - O relatório `relatorio_todos_grafos_20251208_212631.txt` confirmou o processamento dos sete grafos DIMACS com tempos entre 2,06 ms e 14,52 ms.
 - O grafo mais denso é o **GRAFO01.DIMACS** (6 vértices, 12 arestas), com densidade aproximada de 0,40, recomendando matriz de adjacência; ele também teve o maior tempo total (14,52 ms) pela execução completa de todos os algoritmos.
