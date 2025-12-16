@@ -44,7 +44,7 @@ namespace TP_Grafos
         public AlgoritmoCiclo(Grafo grafo)
         {
             this.grafo = grafo;
-            visitado = new bool[grafo.NumVertices];
+            visitado = new bool[grafo.NumVertices + 1];
             pilha = new Stack<int>();
             caminho = new List<int>();
         }
@@ -64,8 +64,9 @@ namespace TP_Grafos
             }
 
             List<int> ciclo = EncontrarCicloEuleriano();
-            resultado.ExisteCiclo = true;
+            resultado.ExisteCiclo = ciclo != null && ciclo.Count > 0;
             resultado.Sequencia = ciclo;
+            resultado.NumeroArestasPercorridas = ciclo != null ? ciclo.Count - 1 : 0;
 
             return resultado;
         }
@@ -98,9 +99,11 @@ namespace TP_Grafos
         /// <returns>True se as condições são satisfeitas, false caso contrário.</returns>
         private bool TemCicloEuleriano()
         {
-            for (int i = 0; i < grafo.NumVertices; i++)
+            for (int i = 1; i <= grafo.NumVertices; i++)
             {
-                if (grafo.Grau(i) % 2 != 0)
+                int grauEntrada = grafo.ObterGrauEntrada(i);
+                int grauSaida = grafo.ObterGrauSaida(i);
+                if (grauEntrada != grauSaida)
                     return false;
             }
             return true;
@@ -112,7 +115,7 @@ namespace TP_Grafos
         /// <returns>A lista de vértices no ciclo.</returns>
         private List<int> EncontrarCicloEuleriano()
         {
-            return Hierholzer(0);
+            return Hierholzer(1);
         }
 
         /// <summary>
@@ -125,11 +128,10 @@ namespace TP_Grafos
             Stack<int> pilha = new Stack<int>();
             List<int> ciclo = new List<int>();
 
-            // Cópia local das adjacências
-            List<int>[] adj = new List<int>[grafo.NumVertices];
-            for (int i = 0; i < grafo.NumVertices; i++)
+            Dictionary<int, List<Aresta>> arestasDisponiveis = new Dictionary<int, List<Aresta>>();
+            for (int i = 1; i <= grafo.NumVertices; i++)
             {
-                adj[i] = new List<int>(grafo.Adjacencias[i]);
+                arestasDisponiveis[i] = new List<Aresta>(grafo.ObterVizinhos(i));
             }
 
             pilha.Push(inicio);
@@ -138,12 +140,12 @@ namespace TP_Grafos
             {
                 int v = pilha.Peek();
 
-                if (adj[v].Count > 0)
+                if (arestasDisponiveis[v].Count > 0)
                 {
-                    int u = adj[v][0];
+                    var aresta = arestasDisponiveis[v][0];
+                    int u = aresta.Destino;
 
-                    //Remove apenas a aresta v → u (grafo direcionado)
-                    adj[v].RemoveAt(0);
+                    arestasDisponiveis[v].RemoveAt(0);
 
                     pilha.Push(u);
                 }
@@ -164,8 +166,14 @@ namespace TP_Grafos
         /// <returns>True se as condições são satisfeitas, false caso contrário.</returns>
         private bool TemCicloHamiltoniano()
         {
-            for (int i = 0; i < grafo.NumVertices; i++)
-                visitado[i] = false;
+            if (grafo.NumVertices < 3)
+                return false;
+
+            for (int i = 1; i <= grafo.NumVertices; i++)
+            {
+                if (grafo.ObterGrauSaida(i) < 1)
+                    return false;
+            }
 
             return true;
         }
@@ -177,13 +185,14 @@ namespace TP_Grafos
         /// <returns>A lista de vértices no ciclo.</returns>
         private List<int> EncontrarCicloHamiltoniano(int inicio)
         {
+            visitado = new bool[grafo.NumVertices + 1];
             List<int> caminhoHamiltoniano = new List<int>();
             caminhoHamiltoniano.Add(inicio);
             visitado[inicio] = true;
 
             if (BacktrackHamiltoniano(caminhoHamiltoniano, 1))
             {
-                caminhoHamiltoniano.Add(inicio); // Fecha o ciclo
+                caminhoHamiltoniano.Add(inicio);
                 return caminhoHamiltoniano;
             }
 
@@ -200,13 +209,16 @@ namespace TP_Grafos
         {
             if (pos == grafo.NumVertices)
             {
-                return grafo.ExisteAresta(caminho[pos - 1], caminho[0]);
+                int ultimoVertice = caminho[pos - 1];
+                int primeiroVertice = caminho[0];
+                return grafo.ExisteAresta(ultimoVertice, primeiroVertice);
             }
 
-            int ultimo = caminho[pos - 1];
+            int verticeAtual = caminho[pos - 1];
 
-            foreach (int v in grafo.Adjacentes(ultimo))
+            foreach (var aresta in grafo.ObterVizinhos(verticeAtual))
             {
+                int v = aresta.Destino;
                 if (!visitado[v])
                 {
                     visitado[v] = true;

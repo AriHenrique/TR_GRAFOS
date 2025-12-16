@@ -15,21 +15,21 @@ namespace TP_Grafos
         private bool usarMatriz;
         private double densidade;
 
-        // Propriedades públicas úteis para leitura externa (se necessário)
         public int NumVertices => numVertices;
         public int NumArestas => numArestas;
 
         public Grafo(string arquivoDIMACS)
         {
             listaAdjacencia = new Dictionary<int, List<Aresta>>();
+            numArestas = 0;
             CarregarDIMACS(arquivoDIMACS);
         }
 
         public Grafo(int vertices)
         {
             numVertices = vertices;
+            numArestas = 0;
             listaAdjacencia = new Dictionary<int, List<Aresta>>();
-            // Inicializa listas para garantir acesso seguro
             for (int i = 1; i <= numVertices; i++)
             {
                 listaAdjacencia[i] = new List<Aresta>();
@@ -43,32 +43,28 @@ namespace TP_Grafos
                 throw new FileNotFoundException("Arquivo DIMACS não encontrado.", arquivo);
 
             var linhas = File.ReadAllLines(arquivo);
+            bool primeiraLinha = true;
+            
             foreach (var linha in linhas)
             {
                 var partes = linha.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
                 if (partes.Length == 0) continue;
 
-                if (partes[0] == "p")
+                if (primeiraLinha && partes.Length >= 2)
                 {
-                    // p edge <vertices> <arestas>
+                    numVertices = int.Parse(partes[0]);
+                    for (int i = 1; i <= numVertices; i++)
+                        listaAdjacencia[i] = new List<Aresta>();
+                    primeiraLinha = false;
+                }
+                else if (!primeiraLinha)
+                {
                     if (partes.Length >= 3)
                     {
-                        numVertices = int.Parse(partes[2]);
-                        // Inicializa lista
-                        for (int i = 1; i <= numVertices; i++)
-                            listaAdjacencia[i] = new List<Aresta>();
-                    }
-                }
-                else if (partes[0] == "a" || partes[0] == "e")
-                {
-                    // a <origem> <destino> <peso> (assumindo capacidade 0 ou igual ao peso se não especificado)
-                    // Formatos variam, assumindo padrão básico: u v w
-                    if (partes.Length >= 4)
-                    {
-                        int u = int.Parse(partes[1]);
-                        int v = int.Parse(partes[2]);
-                        double w = double.Parse(partes[3]);
-                        double cap = w; // Padrão se não houver capacidade explícita
+                        int u = int.Parse(partes[0]);
+                        int v = int.Parse(partes[1]);
+                        double w = double.Parse(partes[2]);
+                        double cap = partes.Length >= 4 ? double.Parse(partes[3]) : w;
                         
                         AdicionarAresta(u, v, w, cap);
                     }
@@ -85,24 +81,19 @@ namespace TP_Grafos
                 densidade = 0;
                 return;
             }
-            // Densidade D = 2|E| / (|V|(|V|-1)) para grafos direcionados
             double maxArestas = (double)numVertices * (numVertices - 1);
             densidade = numArestas / maxArestas;
         }
 
         private void DefinirEstrutura()
         {
-            // Se o grafo for muito denso (> 0.7), usamos matriz para acesso O(1)
-            // Caso contrário, lista de adjacência economiza memória.
-            // Aqui inicializamos a matriz se necessário.
-            usarMatriz = densidade > 0.7 && numVertices < 5000; // Limite de memória arbitrário para segurança
+            usarMatriz = densidade > 0.7 && numVertices < 5000;
 
             if (usarMatriz && matrizAdjacencia == null)
             {
                 matrizAdjacencia = new double[numVertices + 1, numVertices + 1];
                 matrizCapacidade = new double[numVertices + 1, numVertices + 1];
 
-                // Popula a matriz com os dados existentes na lista
                 foreach (var kvp in listaAdjacencia)
                 {
                     foreach (var aresta in kvp.Value)
@@ -144,7 +135,7 @@ namespace TP_Grafos
 
             if (usarMatriz && matrizAdjacencia != null)
             {
-                matrizAdjacencia[origem, destino] = 0; // Ou infinito/null dependendo da lógica
+                matrizAdjacencia[origem, destino] = 0;
                 matrizCapacidade[origem, destino] = 0;
             }
         }
@@ -236,10 +227,9 @@ namespace TP_Grafos
             
             var visitados = new HashSet<int>();
             var fila = new Queue<int>();
-            
-            // Começa do primeiro vértice disponível
+
             int inicio = listaAdjacencia.Keys.FirstOrDefault();
-            if (inicio == 0) return false; // Grafo vazio ou inválido
+            if (inicio == 0) return false;
 
             fila.Enqueue(inicio);
             visitados.Add(inicio);
@@ -249,9 +239,6 @@ namespace TP_Grafos
                 var u = fila.Dequeue();
                 foreach (var aresta in ObterVizinhos(u))
                 {
-                    // Considerando conexidade fraca (grafo não direcionado para fins de travessia)
-                    // Se for fortemente conexo, a lógica seria mais complexa (Kosaraju/Tarjan)
-                    // Mas para grafo geral, BFS simples:
                     if (!visitados.Contains(aresta.Destino))
                     {
                         visitados.Add(aresta.Destino);
@@ -260,10 +247,32 @@ namespace TP_Grafos
                 }
             }
 
-            // Nota: Para grafos direcionados, isso testa apenas acessibilidade a partir da raiz.
-            // Para verificar se é "fortemente conexo", seriam necessárias duas passadas.
-            // Assumindo verificação simples de componentes conexos para grafo não direcionado ou fracamente conexo.
             return visitados.Count == numVertices;
+        }
+
+        /// <summary>
+        /// Obtém o grau de um vértice (grau de entrada + grau de saída).
+        /// </summary>
+        /// <param name="vertice">O vértice (índice baseado em 1).</param>
+        /// <returns>O grau do vértice.</returns>
+        public int Grau(int vertice)
+        {
+            return ObterGrauVertice(vertice);
+        }
+
+        /// <summary>
+        /// Obtém a lista de vértices adjacentes a um vértice.
+        /// </summary>
+        /// <param name="vertice">O vértice (índice baseado em 1).</param>
+        /// <returns>Lista de índices dos vértices adjacentes.</returns>
+        public List<int> Adjacentes(int vertice)
+        {
+            var adjacentes = new List<int>();
+            foreach (var aresta in ObterVizinhos(vertice))
+            {
+                adjacentes.Add(aresta.Destino);
+            }
+            return adjacentes;
         }
 
         public override string ToString()

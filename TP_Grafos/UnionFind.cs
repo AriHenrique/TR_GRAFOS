@@ -26,6 +26,15 @@ namespace TP_Grafos
         /// <param name="n">O número de elementos.</param>
         public UnionFind(int n)
         {
+            pai = new int[n + 1];
+            rank = new int[n + 1];
+            numComponentes = n;
+
+            for (int i = 1; i <= n; i++)
+            {
+                pai[i] = i;
+                rank[i] = 0;
+            }
         }
 
         /// <summary>
@@ -35,7 +44,12 @@ namespace TP_Grafos
         /// <returns>O representante do conjunto.</returns>
         public int Find(int x)
         {
-            return 0;
+            if (pai[x] != x)
+            {
+                // Path compression
+                pai[x] = Find(pai[x]);
+            }
+            return pai[x];
         }
 
         /// <summary>
@@ -45,6 +59,28 @@ namespace TP_Grafos
         /// <param name="y">Um elemento do segundo conjunto.</param>
         public void Union(int x, int y)
         {
+            int raizX = Find(x);
+            int raizY = Find(y);
+
+            if (raizX == raizY)
+                return; // Já estão no mesmo conjunto
+
+            // Union by rank
+            if (rank[raizX] < rank[raizY])
+            {
+                pai[raizX] = raizY;
+            }
+            else if (rank[raizX] > rank[raizY])
+            {
+                pai[raizY] = raizX;
+            }
+            else
+            {
+                pai[raizY] = raizX;
+                rank[raizX]++;
+            }
+
+            numComponentes--;
         }
 
         /// <summary>
@@ -55,7 +91,7 @@ namespace TP_Grafos
         /// <returns>True se estiverem no mesmo conjunto, false caso contrário.</returns>
         public bool MesmoConjunto(int x, int y)
         {
-            return false;
+            return Find(x) == Find(y);
         }
 
         /// <summary>
@@ -64,7 +100,7 @@ namespace TP_Grafos
         /// <returns>O número de componentes.</returns>
         public int ObterNumComponentes()
         {
-            return 0;
+            return numComponentes;
         }
 
         /// <summary>
@@ -72,6 +108,13 @@ namespace TP_Grafos
         /// </summary>
         public void Reset()
         {
+            int n = pai.Length - 1;
+            numComponentes = n;
+            for (int i = 1; i <= n; i++)
+            {
+                pai[i] = i;
+                rank[i] = 0;
+            }
         }
     }
 }

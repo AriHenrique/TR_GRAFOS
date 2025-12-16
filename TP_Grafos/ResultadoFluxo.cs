@@ -47,6 +47,10 @@ namespace TP_Grafos
         /// <param name="fluxo">Valor do fluxo.</param>
         public void AdicionarFluxoAresta(int origem, int destino, double fluxo)
         {
+            if (FluxoPorAresta == null)
+                FluxoPorAresta = new Dictionary<(int, int), double>();
+            
+            FluxoPorAresta[(origem, destino)] = fluxo;
         }
 
         /// <summary>
@@ -55,7 +59,20 @@ namespace TP_Grafos
         /// <returns>A string que representa o resultado.</returns>
         public override string ToString()
         {
-            return "";
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.AppendLine($"Fluxo Máximo: {FluxoMaximo:F2}");
+            sb.AppendLine($"Tempo de Execução: {TempoExecucao:F2} ms");
+            
+            if (CorteMinimo != null && CorteMinimo.Count > 0)
+            {
+                sb.AppendLine($"Corte Mínimo ({CorteMinimo.Count} arestas):");
+                foreach (var aresta in CorteMinimo)
+                {
+                    sb.AppendLine($"  {aresta.Origem} -> {aresta.Destino}");
+                }
+            }
+            
+            return sb.ToString();
         }
 
         /// <summary>
@@ -64,7 +81,25 @@ namespace TP_Grafos
         /// <returns>A string JSON.</returns>
         public string ToJson()
         {
-            return "";
+            System.Text.StringBuilder json = new System.Text.StringBuilder();
+            json.Append("{");
+            json.AppendFormat("\"fluxoMaximo\": {0}, ", FluxoMaximo.ToString("F2"));
+            json.AppendFormat("\"tempoExecucao\": {0}, ", TempoExecucao.ToString("F2"));
+            
+            if (CorteMinimo != null)
+            {
+                json.Append("\"corteMinimo\": [");
+                for (int i = 0; i < CorteMinimo.Count; i++)
+                {
+                    json.AppendFormat("{{\"origem\": {0}, \"destino\": {1}}}", 
+                        CorteMinimo[i].Origem, CorteMinimo[i].Destino);
+                    if (i < CorteMinimo.Count - 1) json.Append(", ");
+                }
+                json.Append("]");
+            }
+            
+            json.Append("}");
+            return json.ToString();
         }
     }
 }

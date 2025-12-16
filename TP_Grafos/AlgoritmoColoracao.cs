@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace TP_Grafos
@@ -39,8 +40,8 @@ namespace TP_Grafos
         public AlgoritmoColoracao(Grafo grafo)
         {
             this.grafo = grafo;
-            cores = new int[grafo.NumVertices];
-            grauSaturacao = new int[grafo.NumVertices];
+            cores = new int[grafo.NumVertices + 1];
+            grauSaturacao = new int[grafo.NumVertices + 1];
             ordemVertices = new List<int>();
         }
 
@@ -50,7 +51,11 @@ namespace TP_Grafos
         /// <returns>O resultado da coloração.</returns>
         public ResultadoColoracao ColoracaoGulosa()
         {
-            Array.Fill(cores, -1);
+            var medidor = new MedidorPerformance();
+            medidor.Iniciar();
+
+            for (int i = 1; i <= grafo.NumVertices; i++)
+                cores[i] = -1;
             numCores = 0;
 
             ResultadoColoracao resultado = new ResultadoColoracao
@@ -61,7 +66,7 @@ namespace TP_Grafos
                 TempoExecucao = 0
             };
 
-            for (int v = 0; v < grafo.NumVertices; v++)
+            for (int v = 1; v <= grafo.NumVertices; v++)
             {
                 int cor = ObterPrimeiraCor(v);
                 cores[v] = cor;
@@ -69,6 +74,8 @@ namespace TP_Grafos
                 numCores = Math.Max(numCores, cor + 1);
             }
 
+            medidor.Parar();
+            resultado.TempoExecucao = medidor.ObterTempoDecorrido();
             resultado.NumeroTurnos = numCores;
             return resultado;
         }
@@ -79,8 +86,14 @@ namespace TP_Grafos
         /// <returns>O resultado da coloração.</returns>
         public ResultadoColoracao ColoracaoDSATUR()
         {
-            Array.Fill(cores, -1);
-            Array.Fill(grauSaturacao, 0);
+            var medidor = new MedidorPerformance();
+            medidor.Iniciar();
+
+            for (int i = 1; i <= grafo.NumVertices; i++)
+            {
+                cores[i] = -1;
+                grauSaturacao[i] = 0;
+            }
             numCores = 0;
 
             ResultadoColoracao resultado = new ResultadoColoracao
@@ -91,7 +104,7 @@ namespace TP_Grafos
                 TempoExecucao = 0
             };
 
-            for (int i = 0; i < grafo.NumVertices; i++)
+            for (int i = 1; i <= grafo.NumVertices; i++)
             {
                 int v = ProximoVerticeDSATUR();
                 int cor = ObterPrimeiraCor(v);
@@ -100,12 +113,15 @@ namespace TP_Grafos
                 resultado.AtribuirCor(v, cor);
                 numCores = Math.Max(numCores, cor + 1);
 
-                foreach (int adj in grafo.Adjacentes(v))
+                foreach (var aresta in grafo.ObterVizinhos(v))
                 {
+                    int adj = aresta.Destino;
                     grauSaturacao[adj] = CalcularGrauSaturacao(adj);
                 }
             }
 
+            medidor.Parar();
+            resultado.TempoExecucao = medidor.ObterTempoDecorrido();
             resultado.NumeroTurnos = numCores;
             return resultado;
         }
@@ -116,7 +132,11 @@ namespace TP_Grafos
         /// <returns>O resultado da coloração.</returns>
         public ResultadoColoracao ColoracaoWelshPowell()
         {
-            Array.Fill(cores, -1);
+            var medidor = new MedidorPerformance();
+            medidor.Iniciar();
+
+            for (int i = 1; i <= grafo.NumVertices; i++)
+                cores[i] = -1;
             numCores = 0;
 
             OrdenarPorGrauDecrescente();
@@ -137,6 +157,8 @@ namespace TP_Grafos
                 numCores = Math.Max(numCores, cor + 1);
             }
 
+            medidor.Parar();
+            resultado.TempoExecucao = medidor.ObterTempoDecorrido();
             resultado.NumeroTurnos = numCores;
             return resultado;
         }
@@ -151,7 +173,7 @@ namespace TP_Grafos
             int maiorSaturacao = -1;
             int maiorGrau = -1;
 
-            for (int v = 0; v < grafo.NumVertices; v++)
+            for (int v = 1; v <= grafo.NumVertices; v++)
             {
                 if (cores[v] != -1)
                     continue;
@@ -180,8 +202,9 @@ namespace TP_Grafos
         {
             HashSet<int> coresAdj = new HashSet<int>();
 
-            foreach (int adj in grafo.Adjacentes(vertice))
+            foreach (var aresta in grafo.ObterVizinhos(vertice))
             {
+                int adj = aresta.Destino;
                 if (cores[adj] != -1)
                     coresAdj.Add(cores[adj]);
             }
@@ -197,8 +220,9 @@ namespace TP_Grafos
         /// <returns>True se a coloração for possível, false caso contrário.</returns>
         private bool PodeColorir(int vertice, int cor)
         {
-            foreach (int adj in grafo.Adjacentes(vertice))
+            foreach (var aresta in grafo.ObterVizinhos(vertice))
             {
+                int adj = aresta.Destino;
                 if (cores[adj] == cor)
                     return false;
             }
@@ -227,7 +251,7 @@ namespace TP_Grafos
         {
             ordemVertices.Clear();
 
-            for (int i = 0; i < grafo.NumVertices; i++)
+            for (int i = 1; i <= grafo.NumVertices; i++)
             {
                 ordemVertices.Add(i);
             }

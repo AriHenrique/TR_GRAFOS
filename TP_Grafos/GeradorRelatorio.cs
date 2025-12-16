@@ -44,8 +44,8 @@ namespace TP_Grafos
         /// Adiciona uma seção ao relatório.
         /// </summary>
         /// <param name="titulo">O título da seção.</param>
-        /// <param name="conteudo">O conteúdo da seção.</param>
-        public void AdicionarSecao(string titulo, string conteudo)
+        /// <param name="texto">O conteúdo da seção.</param>
+        public void AdicionarSecao(string titulo, string texto)
         {
             conteudo.AppendLine(titulo.ToUpper());
             conteudo.AppendLine(new string('-', titulo.Length));
@@ -179,7 +179,7 @@ namespace TP_Grafos
         public string SalvarRelatorio()
         {
             string caminho = $"{nomeArquivo}_{dataGeracao:yyyyMMdd_HHmmss}.txt";
-            File.WriteAllText(caminho, conteudo.ToString());
+            System.IO.File.WriteAllText(caminho, conteudo.ToString());
             return caminho;
         }
     }

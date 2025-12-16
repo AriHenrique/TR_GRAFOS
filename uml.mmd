@@ -4,21 +4,29 @@ config:
 ---
 classDiagram
     class Program {
-        -Grafo grafo$
-        -string arquivoLogAtual$
-        -Main(string[] args)$ void
-        -ExibirMenu()$ void
-        -ProcessarEscolha(int opcao)$ void
-        -ExecutarRoteamentoMenorCusto()$ void
-        -ExecutarFluxoMaximo()$ void
-        -ExecutarArvoreGeradora()$ void
-        -ExecutarColoracao()$ void
-        -ExecutarCicloEuleriano()$ void
-        -ExecutarCicloHamiltoniano()$ void
-        -ExecutarTodasAnalises()$ void
-        -GerarRelatorioCompleto()$ void
-        -SalvarLog(string mensagem)$ void
+        -static Grafo grafo
+        -static string arquivoLogAtual
+        -static string arquivoAtual
+        +Main(string[] args) void
+        -ExibirMenu() void
+        -ProcessarEscolha(int opcao) void
+        -ExecutarRoteamentoMenorCusto() void
+        -ExecutarFluxoMaximo() void
+        -ExecutarArvoreGeradora() void
+        -ExecutarColoracao() void
+        -ExecutarCicloEuleriano() void
+        -ExecutarCicloHamiltoniano() void
+        -ExecutarTodasAnalises() void
+        -ExecutarRoteamentoMenorCustoAutomatico(int origem, int destino) void
+        -ExecutarFluxoMaximoAutomatico(int origem, int destino) void
+        -ExecutarArvoreGeradoraAutomatico(int algoritmo) void
+        -ExecutarColoracaoAutomatico(int algoritmo) void
+        -GerarRelatorioCompleto() void
+        -ExibirInformacoesGrafo() void
+        -ExecutarTodosArquivosDIMACS() void
+        -SalvarLog(string mensagem) void
     }
+
     class Grafo {
         -Dictionary~int, List~Aresta~~ listaAdjacencia
         -double[,] matrizAdjacencia
@@ -27,11 +35,11 @@ classDiagram
         -int numArestas
         -bool usarMatriz
         -double densidade
+        +int NumVertices
+        +int NumArestas
         +Grafo(string arquivoDIMACS)
         +Grafo(int vertices)
         +CarregarDIMACS(string arquivo) void
-        -CalcularDensidade() void
-        -DefinirEstrutura() void
         +AdicionarAresta(int origem, int destino, double peso, double capacidade) void
         +RemoverAresta(int origem, int destino) void
         +ObterVizinhos(int vertice) List~Aresta~
@@ -43,8 +51,11 @@ classDiagram
         +ObterGrauEntrada(int vertice) int
         +ObterGrauSaida(int vertice) int
         +EhConexo() bool
+        +Grau(int vertice) int
+        +Adjacentes(int vertice) List~int~
         +ToString() string
     }
+
     class Aresta {
         +int Origem
         +int Destino
@@ -56,86 +67,64 @@ classDiagram
         +GetHashCode() int
         +ToString() string
     }
+
     class AlgoritmoCaminhoMinimo {
         -Grafo grafo
-        -double[] distancias
-        -int[] predecessores
-        -bool[] visitados
         +AlgoritmoCaminhoMinimo(Grafo grafo)
         +Dijkstra(int origem, int destino) ResultadoCaminho
         +BellmanFord(int origem, int destino) ResultadoCaminho
-        -RelaxarAresta(int u, int v, double peso) void
-        -ExtrairMinimo(SortedSet~(double, int)~ pq) int
-        -ReconstruirCaminho(int origem, int destino) List~int~
-        -InicializarEstruturas(int origem) void
     }
+
     class ResultadoCaminho {
         +List~int~ Caminho
         +double CustoTotal
         +bool CaminhoEncontrado
         +double TempoExecucao
         +string AlgoritmoUsado
-        +ResultadoCaminho()
         +AdicionarVertice(int vertice) void
         +ToString() string
         +ToJson() string
     }
+
     class AlgoritmoFluxoMaximo {
         -Grafo grafo
-        -double[,] fluxo
-        -double[,] capacidadeResidual
-        -int[] pai
-        -bool[] visitado
         +AlgoritmoFluxoMaximo(Grafo grafo)
         +FordFulkerson(int origem, int destino) ResultadoFluxo
         +EdmondsKarp(int origem, int destino) ResultadoFluxo
-        -BFS(int origem, int destino) bool
-        -DFS(int origem, int destino, double fluxoMin) double
-        -EncontrarCaminhoAumentante(int origem, int destino) double
-        -AtualizarFluxo(int origem, int destino, double valorFluxo) void
         +EncontrarCorteMinimo(int origem, int destino) List~Aresta~
-        -ConstruirGrafoResidual() void
     }
+
     class ResultadoFluxo {
         +double FluxoMaximo
         +List~Aresta~ CorteMinimo
-        +Dictionary~(int, int), double~ FluxoPorAresta
+        +Dictionary~(int,int), double~ FluxoPorAresta
         +List~List~int~~ CaminhosAumentantes
         +double TempoExecucao
-        +ResultadoFluxo()
         +AdicionarFluxoAresta(int origem, int destino, double fluxo) void
         +ToString() string
         +ToJson() string
     }
+
     class AlgoritmoArvoreGeradora {
         -Grafo grafo
-        -UnionFind unionFind
-        -List~Aresta~ arestasOrdenadas
-        -bool[] visitado
-        -PriorityQueue~Aresta~ filaPrioridade
         +AlgoritmoArvoreGeradora(Grafo grafo)
         +Kruskal() ResultadoArvore
         +Prim(int verticeInicial) ResultadoArvore
         +Boruvka() ResultadoArvore
-        -OrdenarArestasPorPeso() void
-        -ObterArestaMinimaComponente(int componente) Aresta
-        -VerificarConectividade() bool
     }
+
     class ResultadoArvore {
         +List~Aresta~ Arestas
         +double CustoTotal
         +bool ArvoreEncontrada
         +string AlgoritmoUsado
         +double TempoExecucao
-        +ResultadoArvore()
         +AdicionarAresta(Aresta aresta) void
         +ToString() string
         +ToJson() string
     }
+
     class UnionFind {
-        -int[] pai
-        -int[] rank
-        -int numComponentes
         +UnionFind(int n)
         +Find(int x) int
         +Union(int x, int y) void
@@ -143,52 +132,34 @@ classDiagram
         +ObterNumComponentes() int
         +Reset() void
     }
+
     class AlgoritmoColoracao {
         -Grafo grafo
-        -int[] cores
-        -int numCores
-        -List~int~ ordemVertices
-        -int[] grauSaturacao
         +AlgoritmoColoracao(Grafo grafo)
         +ColoracaoGulosa() ResultadoColoracao
         +ColoracaoDSATUR() ResultadoColoracao
         +ColoracaoWelshPowell() ResultadoColoracao
-        -ProximoVerticeDSATUR() int
-        -CalcularGrauSaturacao(int vertice) int
-        -PodeColorir(int vertice, int cor) bool
-        -ObterPrimeiraCor(int vertice) int
-        -OrdenarPorGrauDecrescente() void
     }
+
     class ResultadoColoracao {
         +Dictionary~int, List~int~~ GruposPorCor
         +int NumeroTurnos
         +Dictionary~int, int~ CorPorVertice
         +string AlgoritmoUsado
         +double TempoExecucao
-        +ResultadoColoracao()
         +AtribuirCor(int vertice, int cor) void
         +ObterVerticesPorCor(int cor) List~int~
         +ToString() string
         +ToJson() string
     }
+
     class AlgoritmoCiclo {
         -Grafo grafo
-        -bool[] visitado
-        -Stack~int~ pilha
-        -List~int~ caminho
-        -int[] grauEntrada
-        -int[] grauSaida
         +AlgoritmoCiclo(Grafo grafo)
         +VerificarCicloEuleriano() ResultadoCiclo
         +VerificarCicloHamiltoniano() ResultadoCiclo
-        -TemCicloEuleriano() bool
-        -EncontrarCicloEuleriano() List~int~
-        -Hierholzer(int inicio) List~int~
-        -TemCicloHamiltoniano() bool
-        -EncontrarCicloHamiltoniano(int inicio) List~int~
-        -BacktrackHamiltoniano(List~int~ caminho, int pos) bool
-        -TodosVerticesVisitados() bool
     }
+
     class ResultadoCiclo {
         +bool ExisteCiclo
         +List~int~ Sequencia
@@ -196,15 +167,12 @@ classDiagram
         +int NumeroVerticesVisitados
         +int NumeroArestasPercorridas
         +double TempoExecucao
-        +ResultadoCiclo()
         +AdicionarVertice(int vertice) void
         +ToString() string
         +ToJson() string
     }
+
     class GeradorRelatorio {
-        -string nomeArquivo
-        -DateTime dataGeracao
-        -StringBuilder conteudo
         +GeradorRelatorio(string nomeBase)
         +AdicionarSecao(string titulo, string conteudo) void
         +AdicionarResultado(string problema, object resultado) void
@@ -214,12 +182,9 @@ classDiagram
         +GerarRelatorioHTML(List~object~ resultados) void
         +GerarRelatorioPDF(List~object~ resultados) void
         +GerarRelatorioJSON(List~object~ resultados) void
-        +SalvarRelatorio() string
     }
+
     class ArquivoLog {
-        -string caminhoLog
-        -StreamWriter writer
-        -object lockObj
         +ArquivoLog(string nomeBase)
         +Escrever(string mensagem) void
         +EscreverResultado(string problema, object resultado) void
@@ -230,20 +195,20 @@ classDiagram
         +LerLog() string
         +LimparLog() void
     }
+
     class ValidadorGrafo {
-        +ValidarFormatoDIMACS(string arquivo)$ bool
-        +ValidarConectividade(Grafo grafo)$ bool
-        +ValidarPesosPositivos(Grafo grafo)$ bool
-        +ValidarCapacidades(Grafo grafo)$ bool
-        +ValidarGrafoEuleriano(Grafo grafo)$ bool
-        +ValidarGrafoHamiltoniano(Grafo grafo)$ bool
-        +ObterErros()$ List~string~
-        +GerarRelatorioValidacao(Grafo grafo)$ string
+        <<static>>
+        +ValidarFormatoDIMACS(string arquivo) bool
+        +ValidarConectividade(Grafo grafo) bool
+        +ValidarPesosPositivos(Grafo grafo) bool
+        +ValidarCapacidades(Grafo grafo) bool
+        +ValidarGrafoEuleriano(Grafo grafo) bool
+        +ValidarGrafoHamiltoniano(Grafo grafo) bool
+        +ObterErros() List~string~
+        +GerarRelatorioValidacao(Grafo grafo) string
     }
+
     class MedidorPerformance {
-        -Stopwatch cronometro
-        -long memoriaInicial
-        -long memoriaFinal
         +MedidorPerformance()
         +Iniciar() void
         +Parar() void
@@ -251,6 +216,7 @@ classDiagram
         +ObterUsoMemoria() long
         +GerarEstatisticas() string
     }
+
     Program ..> Grafo : usa
     Program ..> AlgoritmoCaminhoMinimo : cria
     Program ..> AlgoritmoFluxoMaximo : cria
@@ -262,7 +228,7 @@ classDiagram
     Program ..> ValidadorGrafo : usa
     Program ..> MedidorPerformance : usa
 
-    Grafo *-- Aresta : contém
+    Grafo *-- Aresta : contem
 
     AlgoritmoCaminhoMinimo --> Grafo : analisa
     AlgoritmoCaminhoMinimo ..> ResultadoCaminho : retorna

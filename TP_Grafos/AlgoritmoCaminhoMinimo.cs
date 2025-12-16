@@ -38,8 +38,6 @@ namespace TP_Grafos
             var medidor = new MedidorPerformance();
             medidor.Iniciar();
 
-            // Usando SortedSet como Fila de Prioridade: (distancia, vertice)
-            // Comparador personalizado para permitir distâncias duplicadas em vértices diferentes
             var pq = new SortedSet<(double Dist, int Vert)>(Comparer<(double Dist, int Vert)>.Create((a, b) =>
             {
                 int res = a.Dist.CompareTo(b.Dist);
@@ -56,7 +54,7 @@ namespace TP_Grafos
                 if (visitados[u]) continue;
                 visitados[u] = true;
 
-                if (u == destino) break; // Encontramos o destino
+                if (u == destino) break;
 
                 foreach (var aresta in grafo.ObterVizinhos(u))
                 {
@@ -99,23 +97,11 @@ namespace TP_Grafos
             int V = grafo.NumVertices;
             var arestas = grafo.ObterTodasArestas();
 
-            // Relaxamento V-1 vezes
             for (int i = 1; i < V; i++)
             {
                 foreach (var aresta in arestas)
                 {
                     RelaxarAresta(aresta.Origem, aresta.Destino, aresta.Peso);
-                }
-            }
-
-            // Verificação de ciclo negativo (opcional, mas boa prática em Bellman-Ford)
-            foreach (var aresta in arestas)
-            {
-                if (distancias[aresta.Origem] != double.PositiveInfinity &&
-                    distancias[aresta.Origem] + aresta.Peso < distancias[aresta.Destino])
-                {
-                    // Ciclo negativo detectado
-                    // Poderíamos lançar exceção ou marcar no resultado
                 }
             }
 
@@ -145,7 +131,6 @@ namespace TP_Grafos
         {
             if (distancias[u] != double.PositiveInfinity && distancias[u] + peso < distancias[v])
             {
-                // Se estiver usando PQ (Dijkstra), removemos o antigo par antes de atualizar
                 if (pq != null && distancias[v] != double.PositiveInfinity)
                 {
                     pq.Remove((distancias[v], v));
@@ -183,7 +168,7 @@ namespace TP_Grafos
             caminho.Reverse();
             if (caminho.Count > 0 && caminho[0] == origem)
                 return caminho;
-            return new List<int>(); // Caminho inválido
+            return new List<int>();
         }
     }
 }

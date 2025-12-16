@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TP_Grafos
 {
@@ -38,6 +40,13 @@ namespace TP_Grafos
         /// <param name="grafo">O grafo.</param>
         public AlgoritmoFluxoMaximo(Grafo grafo)
         {
+            this.grafo = grafo;
+            int n = grafo.NumVertices;
+            fluxo = new double[n + 1, n + 1];
+            capacidadeResidual = new double[n + 1, n + 1];
+            pai = new int[n + 1];
+            visitado = new bool[n + 1];
+            ConstruirGrafoResidual();
         }
 
         /// <summary>
@@ -48,7 +57,46 @@ namespace TP_Grafos
         /// <returns>O resultado do fluxo máximo.</returns>
         public ResultadoFluxo FordFulkerson(int origem, int destino)
         {
-            return null;
+            var medidor = new MedidorPerformance();
+            medidor.Iniciar();
+
+            var resultado = new ResultadoFluxo
+            {
+                FluxoMaximo = 0,
+                CorteMinimo = new List<Aresta>(),
+                FluxoPorAresta = new Dictionary<(int, int), double>(),
+                CaminhosAumentantes = new List<List<int>>()
+            };
+
+            ConstruirGrafoResidual();
+
+            double fluxoTotal = 0;
+            double fluxoAumentante;
+
+            while ((fluxoAumentante = DFS(origem, destino, double.PositiveInfinity)) > 0)
+            {
+                fluxoTotal += fluxoAumentante;
+                AtualizarFluxo(origem, destino, fluxoAumentante);
+            }
+
+            medidor.Parar();
+            resultado.TempoExecucao = medidor.ObterTempoDecorrido();
+            resultado.FluxoMaximo = fluxoTotal;
+
+            for (int i = 1; i <= grafo.NumVertices; i++)
+            {
+                for (int j = 1; j <= grafo.NumVertices; j++)
+                {
+                    if (fluxo[i, j] > 0)
+                    {
+                        resultado.FluxoPorAresta[(i, j)] = fluxo[i, j];
+                    }
+                }
+            }
+
+            resultado.CorteMinimo = EncontrarCorteMinimo(origem, destino);
+
+            return resultado;
         }
 
         /// <summary>
@@ -59,7 +107,61 @@ namespace TP_Grafos
         /// <returns>O resultado do fluxo máximo.</returns>
         public ResultadoFluxo EdmondsKarp(int origem, int destino)
         {
-            return null;
+            var medidor = new MedidorPerformance();
+            medidor.Iniciar();
+
+            var resultado = new ResultadoFluxo
+            {
+                FluxoMaximo = 0,
+                CorteMinimo = new List<Aresta>(),
+                FluxoPorAresta = new Dictionary<(int, int), double>(),
+                CaminhosAumentantes = new List<List<int>>()
+            };
+
+            ConstruirGrafoResidual();
+
+            double fluxoTotal = 0;
+
+            while (BFS(origem, destino))
+            {
+                double fluxoAumentante = double.PositiveInfinity;
+
+                for (int v = destino; v != origem; v = pai[v])
+                {
+                    int u = pai[v];
+                    fluxoAumentante = Math.Min(fluxoAumentante, capacidadeResidual[u, v]);
+                }
+
+                for (int v = destino; v != origem; v = pai[v])
+                {
+                    int u = pai[v];
+                    capacidadeResidual[u, v] -= fluxoAumentante;
+                    capacidadeResidual[v, u] += fluxoAumentante;
+                    fluxo[u, v] += fluxoAumentante;
+                    fluxo[v, u] -= fluxoAumentante;
+                }
+
+                fluxoTotal += fluxoAumentante;
+            }
+
+            medidor.Parar();
+            resultado.TempoExecucao = medidor.ObterTempoDecorrido();
+            resultado.FluxoMaximo = fluxoTotal;
+
+            for (int i = 1; i <= grafo.NumVertices; i++)
+            {
+                for (int j = 1; j <= grafo.NumVertices; j++)
+                {
+                    if (fluxo[i, j] > 0)
+                    {
+                        resultado.FluxoPorAresta[(i, j)] = fluxo[i, j];
+                    }
+                }
+            }
+
+            resultado.CorteMinimo = EncontrarCorteMinimo(origem, destino);
+
+            return resultado;
         }
 
         /// <summary>
@@ -70,6 +172,35 @@ namespace TP_Grafos
         /// <returns>True se um caminho foi encontrado, false caso contrário.</returns>
         private bool BFS(int origem, int destino)
         {
+            for (int i = 1; i <= grafo.NumVertices; i++)
+            {
+                visitado[i] = false;
+                pai[i] = -1;
+            }
+
+            var fila = new Queue<int>();
+            fila.Enqueue(origem);
+            visitado[origem] = true;
+            pai[origem] = -1;
+
+            while (fila.Count > 0)
+            {
+                int u = fila.Dequeue();
+
+                for (int v = 1; v <= grafo.NumVertices; v++)
+                {
+                    if (!visitado[v] && capacidadeResidual[u, v] > 0)
+                    {
+                        visitado[v] = true;
+                        pai[v] = u;
+                        fila.Enqueue(v);
+
+                        if (v == destino)
+                            return true;
+                    }
+                }
+            }
+
             return false;
         }
 
@@ -82,6 +213,30 @@ namespace TP_Grafos
         /// <returns>O valor do fluxo no caminho encontrado.</returns>
         private double DFS(int origem, int destino, double fluxoMin)
         {
+            if (origem == destino)
+                return fluxoMin;
+
+            visitado[origem] = true;
+
+            for (int v = 1; v <= grafo.NumVertices; v++)
+            {
+                if (!visitado[v] && capacidadeResidual[origem, v] > 0)
+                {
+                    double fluxoEncontrado = DFS(v, destino, Math.Min(fluxoMin, capacidadeResidual[origem, v]));
+                    
+                    if (fluxoEncontrado > 0)
+                    {
+                        capacidadeResidual[origem, v] -= fluxoEncontrado;
+                        capacidadeResidual[v, origem] += fluxoEncontrado;
+                        fluxo[origem, v] += fluxoEncontrado;
+                        fluxo[v, origem] -= fluxoEncontrado;
+                        visitado[origem] = false;
+                        return fluxoEncontrado;
+                    }
+                }
+            }
+
+            visitado[origem] = false;
             return 0;
         }
 
@@ -93,7 +248,10 @@ namespace TP_Grafos
         /// <returns>O valor do fluxo que pode ser enviado pelo caminho.</returns>
         private double EncontrarCaminhoAumentante(int origem, int destino)
         {
-            return 0;
+            for (int i = 1; i <= grafo.NumVertices; i++)
+                visitado[i] = false;
+
+            return DFS(origem, destino, double.PositiveInfinity);
         }
 
         /// <summary>
@@ -114,7 +272,40 @@ namespace TP_Grafos
         /// <returns>A lista de arestas que compõem o corte mínimo.</returns>
         public List<Aresta> EncontrarCorteMinimo(int origem, int destino)
         {
-            return null;
+            var corte = new List<Aresta>();
+
+            for (int i = 1; i <= grafo.NumVertices; i++)
+                visitado[i] = false;
+
+            var fila = new Queue<int>();
+            fila.Enqueue(origem);
+            visitado[origem] = true;
+
+            while (fila.Count > 0)
+            {
+                int u = fila.Dequeue();
+                for (int v = 1; v <= grafo.NumVertices; v++)
+                {
+                    if (!visitado[v] && capacidadeResidual[u, v] > 0)
+                    {
+                        visitado[v] = true;
+                        fila.Enqueue(v);
+                    }
+                }
+            }
+
+            for (int i = 1; i <= grafo.NumVertices; i++)
+            {
+                for (int j = 1; j <= grafo.NumVertices; j++)
+                {
+                    if (visitado[i] && !visitado[j] && grafo.ExisteAresta(i, j))
+                    {
+                        corte.Add(new Aresta(i, j, grafo.ObterPeso(i, j), grafo.ObterCapacidade(i, j)));
+                    }
+                }
+            }
+
+            return corte;
         }
 
         /// <summary>
@@ -122,6 +313,22 @@ namespace TP_Grafos
         /// </summary>
         private void ConstruirGrafoResidual()
         {
+            int n = grafo.NumVertices;
+
+            for (int i = 1; i <= n; i++)
+            {
+                for (int j = 1; j <= n; j++)
+                {
+                    capacidadeResidual[i, j] = 0;
+                    fluxo[i, j] = 0;
+                }
+            }
+
+            var todasArestas = grafo.ObterTodasArestas();
+            foreach (var aresta in todasArestas)
+            {
+                capacidadeResidual[aresta.Origem, aresta.Destino] = aresta.Capacidade;
+            }
         }
     }
 }
